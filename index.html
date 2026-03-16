@@ -334,10 +334,10 @@
     <canvas id="canvas"></canvas>
     <img id="preview" style="display:none" alt="náhled" />
     <div class="placeholder" id="placeholder">
-      <div class="ico">🧊</div>
+      <div class="ico">🍽️</div>
       <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Seš zoufalá nebo jen hledáš inspiraci? 🙂</p>
-      <p>Nevíš co dnes ukuchtit?<br><span style="color:var(--accent)">Fridge Chef ti pomůže!</span> 😄</p>
-      <p style="margin-top:10px;font-size:13px;color:var(--text3)">Vyfoť co máš v lednici<br>a dostaneš 3 recepty na míru</p>
+      <p style="color:var(--accent)">Fridge Chef ti pomůže!</p>
+      <p style="margin-top:10px;font-size:13px;color:var(--text2);background:rgba(255,255,255,0.04);border-radius:10px;padding:8px 12px;line-height:1.6">Vyfoť lednici a za chvíli<br>máš 3 recepty přímo na míru</p>
     </div>
   </div>
   <div id="btns-start" class="btn-row">
@@ -505,7 +505,7 @@ function showScreen(name) {
   $('screen-' + name).classList.add('active');
   window.scrollTo(0, 0);
   $('back-btn').style.display = name !== 'camera' ? 'block' : 'none';
-  $('header-sub').textContent = name === 'camera' ? 'Nevíš co dnes ukuchtit?'
+  $('header-sub').textContent = name === 'camera' ? ''
     : name === 'prefs'   ? 'Tak co ti dnes chutná? 🤔'
     : name === 'recipes' ? 'Tady máš, vyber si! 🍽'
     : 'Jdeme na to! 👨‍🍳';
@@ -637,7 +637,8 @@ Navrhni přesně 3 různá konkrétní tradiční nebo populární jídla.${excl
 
 Každé jídlo musí být skutečně existující z tradiční kuchyně.
 U ingrediencí VŽDY uveď přesnou gramáž nebo množství (např. "200 g kuřecích prsou", "2 vejce", "100 ml smetany").
-U každého kroku VŽDY uveď čas pokud je relevantní (např. "Smažte 5 minut na středním ohni", "Pečte 25 minut při 180 °C").
+U každého kroku piš PODROBNÝ postup — jako bys vysvětloval někomu kdo vaří poprvé. Uveď teplotu, čas, konzistenci, barvu nebo vůni jako signál kdy je krok hotový (např. "Rozpalte pánev na střední teplotu, přidejte máslo a počkejte až začne pěnit — asi 1 minutu. Přidejte vejce a míchejte gumovou stěrkou dokud nejsou zpola tuhá, přibližně 2–3 minuty.").
+Každý recept musí mít 6–8 kroků.
 Uveď celkový čas přípravy a čas vaření.
 
 Odpověz POUZE jako JSON bez markdown:
@@ -750,7 +751,7 @@ async function callAPI(key, content) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 1500,
+      max_tokens: 2500,
       messages: [{ role: 'user', content }]
     })
   });
