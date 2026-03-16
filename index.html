@@ -762,11 +762,14 @@ async function callAPI(key, content) {
 }
 
 function parseJSON(raw) {
-  const clean = raw.replace(/^```[a-z]*\n?/i, '').replace(/```$/, '').trim();
+  const clean = raw
+    .replace(/^```[a-z]*\n?/i, '').replace(/```$/, '').trim()
+    .replace(/,\s*([\]}])/g, '$1'); // remove trailing commas
   try { return JSON.parse(clean); } catch(_) {
     const m = clean.match(/\{[\s\S]*\}/);
     if (!m) throw new Error('Nepodařilo se zparsovat odpověď AI.');
-    return JSON.parse(m[0]);
+    const cleaned = m[0].replace(/,\s*([\]}])/g, '$1');
+    return JSON.parse(cleaned);
   }
 }
 
