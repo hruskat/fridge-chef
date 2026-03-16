@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Fridge Chef</title>
+<style>
+  :root {
+    --bg: #0f0f0d;
+    --bg2: #1a1a16;
+    --bg3: #242420;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0ede6;
+    --text2: #9a9590;
+    --text3: #5a5550;
+    --accent: #c8a96e;
+    --green-light: #a8d4b4;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 3rem;
+  }
+  header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; flex: 1; }
+  header h1 span { color: var(--accent); }
+  header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  #back-btn {
+    display: none;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text2);
+    font-size: 13px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  #settings-btn {
+    width: 36px; height: 36px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 50%;
+    color: var(--text2);
+    font-size: 17px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* settings drawer */
+  #settings-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+  }
+  #settings-overlay.open { display: block; }
+  #settings-drawer {
+    position: fixed;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: var(--bg2);
+    border-top: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem;
+    z-index: 101;
+    transition: transform 0.25s ease;
+  }
+  #settings-drawer h3 { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); }
+  #settings-drawer .close-btn {
+    position: absolute; top: 1.25rem; right: 1.25rem;
+    background: var(--bg3); border: none; border-radius: 50%;
+    width: 28px; height: 28px; font-size: 16px; color: var(--text2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #api-key-status {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+    font-size: 13px; color: var(--text2); margin-bottom: 8px;
+    cursor: pointer;
+  }
+  #api-key-status .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    background: var(--text3);
+  }
+  #api-key-status .dot.ok { background: var(--green-light); }
+  #api-key-input-wrap { display: none; }
+  #api-key-input-wrap input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+    padding: 9px 12px;
+    outline: none;
+    -webkit-appearance: none;
+    margin-bottom: 6px;
+  }
+  #api-key-input-wrap input:focus { border-color: var(--accent); }
+  .drawer-save-btn {
+    width: 100%; padding: 11px;
+    background: var(--accent); border: none; border-radius: var(--radius-sm);
+    color: #1a1208; font-size: 15px; font-weight: 600; cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .screen { display: none; padding: 1.25rem 1.5rem; }
+  .screen.active { display: block; }
+
+  /* CAMERA */
+  .camera-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .camera-box video, .camera-box img { width: 100%; display: block; }
+  .placeholder { text-align: center; padding: 2rem 1.5rem; }
+  .placeholder .ico { font-size: 36px; margin-bottom: 0.75rem; }
+  .placeholder p { font-size: 14px; color: var(--text2); line-height: 1.5; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 1rem; }
+  .btn {
+    flex: 1;
+    padding: 12px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    -webkit-appearance: none;
+    transition: opacity 0.15s;
+  }
+  .btn:active { opacity: 0.7; }
+  .btn:disabled { opacity: 0.3; cursor: default; }
+  .btn-gold { background: var(--accent); border-color: var(--accent); color: #1a1208; }
+  label.btn { display: block; cursor: pointer; }
+
+  .status {
+    margin-top: 1rem;
+    font-size: 13px;
+    color: var(--text2);
+    text-align: center;
+    min-height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .err { color: #e07060; font-size: 13px; text-align: center; margin-top: 0.5rem; min-height: 18px; }
+
+  /* INGREDIENTS */
+  .section-head {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    margin-bottom: 0.75rem;
+    margin-top: 1.25rem;
+  }
+  .section-head:first-child { margin-top: 0; }
+
+  .ing-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ing-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* RECIPE CARDS */
+  .recipe-cards { display: flex; flex-direction: column; gap: 10px; }
+  .recipe-card-btn {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.15s, background 0.15s;
+    width: 100%;
+    text-align: left;
+    -webkit-appearance: none;
+  }
+  .recipe-card-btn:active { background: var(--bg3); border-color: var(--accent); }
+  .recipe-card-btn .emoji { font-size: 32px; flex-shrink: 0; }
+  .recipe-card-btn .info { flex: 1; }
+  .recipe-card-btn .rname { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .recipe-card-btn .rorigin { font-size: 12px; color: var(--accent); }
+  .recipe-card-btn .rdesc { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
+  .recipe-card-btn .rtime { font-size: 12px; color: var(--text3); margin-top: 5px; }
+  .recipe-card-btn .arrow { color: var(--text3); font-size: 18px; flex-shrink: 0; }
+
+  .actions-row { display: flex; gap: 10px; margin-top: 1.25rem; }
+
+  /* RECIPE DETAIL */
+  .detail-hero {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .detail-emoji { font-size: 48px; margin-bottom: 0.75rem; }
+  .detail-name { font-size: 24px; font-weight: 600; line-height: 1.2; margin-bottom: 4px; }
+  .detail-origin { font-size: 13px; color: var(--accent); margin-bottom: 0.5rem; }
+  .detail-desc { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.75rem; }
+  .meta-pill { background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text2); }
+
+  .detail-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  ul.ilist, ol.slist { list-style: none; padding: 0; }
+  ul.ilist li, ol.slist li {
+    font-size: 14px; color: var(--text);
+    padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5;
+  }
+  ul.ilist li:last-child, ol.slist li:last-child { border-bottom: none; }
+  ul.ilist li { display: flex; align-items: flex-start; gap: 8px; }
+  ul.ilist li::before { content: ''; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+  ul.ilist.dim li::before { background: var(--text3); }
+  ol.slist { counter-reset: s; }
+  ol.slist li { counter-increment: s; padding-left: 2.25rem; position: relative; }
+  ol.slist li::before {
+    content: counter(s); position: absolute; left: 0; top: 7px;
+    width: 20px; height: 20px; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 50%; font-size: 11px; font-weight: 500; color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 14px;
+    color: var(--text2);
+    cursor: pointer;
+    -webkit-appearance: none;
+    transition: all 0.15s;
+  }
+  .tag:active { opacity: 0.7; }
+  .tag.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1a1208;
+  }
+
+  canvas { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="flex:1">
+    <h1>Fridge <span>Chef</span></h1>
+    <p id="header-sub">Vyfoť lednici, dostaneš recept</p>
+  </div>
+  <button id="back-btn" onclick="goBack()">← Zpět</button>
+  <button id="settings-btn" onclick="openSettings()" title="Nastavení">⚙</button>
+</header>
+
+<!-- settings drawer -->
+<div id="settings-overlay" onclick="closeSettings()">
+</div>
+<div id="settings-drawer">
+  <button class="close-btn" onclick="closeSettings()">✕</button>
+  <h3>Nastavení</h3>
+  <span class="lbl">API klíč</span>
+  <div id="api-key-status" onclick="toggleKeyInput()">
+    <span class="dot" id="key-dot"></span>
+    <span id="key-label">Klikni pro zadání klíče</span>
+  </div>
+  <div id="api-key-input-wrap">
+    <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off" />
+    <p class="hint" style="margin-bottom:8px">Klíč se uloží jen do tohoto prohlížeče.</p>
+    <button class="drawer-save-btn" onclick="saveKey()">Uložit</button>
+  </div>
+</div>
+
+<!-- SCREEN 1: kamera -->
+<div id="screen-camera" class="screen active">
+  <div class="camera-box" id="camera-box">
+    <video id="video" autoplay playsinline muted style="display:none"></video>
+    <canvas id="canvas"></canvas>
+    <img id="preview" style="display:none" alt="náhled" />
+    <div class="placeholder" id="placeholder">
+      <div class="ico">🧊</div>
+      <p>Vyfoť obsah lednice<br>a AI navrhne 3 recepty</p>
+    </div>
+  </div>
+  <div id="btns-start" class="btn-row">
+    <button class="btn btn-gold" onclick="startCamera()">Spustit kameru</button>
+    <label class="btn">Ze souboru<input type="file" accept="image/*" style="display:none" onchange="loadFile(event)"></label>
+  </div>
+  <div id="btns-live" class="btn-row" style="display:none">
+    <button class="btn" onclick="retake()">Zrušit</button>
+    <button class="btn btn-gold" onclick="capture()">Vyfotit</button>
+  </div>
+  <div id="btns-taken" class="btn-row" style="display:none">
+    <button class="btn" onclick="retake()">Znovu</button>
+    <button class="btn btn-gold" id="analyze-btn" onclick="analyze()">Analyzovat</button>
+  </div>
+  <div class="status" id="status"></div>
+  <p class="err" id="err"></p>
+</div>
+
+<!-- SCREEN 1.5: preference -->
+<div id="screen-prefs" class="screen">
+  <p class="section-head">Nalezené ingredience</p>
+  <div class="ing-grid" id="ing-grid-prefs"></div>
+
+  <div style="margin-top:1.5rem">
+    <p class="section-head">Na co máš chuť?</p>
+    <div class="tag-grid" id="mood-tags">
+      <button class="tag" onclick="toggleTag(this,'mood')">🍳 Rychlé a jednoduché</button>
+      <button class="tag" onclick="toggleTag(this,'mood')">🥗 Lehké a zdravé</button>
+      <button class="tag" onclick="toggleTag(this,'mood')">🍖 Pořádné a sytné</button>
+      <button class="tag" onclick="toggleTag(this,'mood')">🍰 Sladké</button>
+      <button class="tag" onclick="toggleTag(this,'mood')">🥘 Polévka nebo vývar</button>
+      <button class="tag" onclick="toggleTag(this,'mood')">🔥 Něco pikantního</button>
+    </div>
+  </div>
+
+  <div style="margin-top:1.25rem">
+    <p class="section-head">Typ kuchyně?</p>
+    <div class="tag-grid" id="cuisine-tags">
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🇨🇿 Česká</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🇮🇹 Italská</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🇫🇷 Francouzská</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🌏 Asijská</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🌮 Mexická</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🥙 Středomořská</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🫕 Americká</button>
+      <button class="tag" onclick="toggleTag(this,'cuisine')">🍱 Japonská</button>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem" class="btn-row">
+    <button class="btn" onclick="retake()">Nová fotka</button>
+    <button class="btn btn-gold" onclick="confirmPrefs()">Najít recepty →</button>
+  </div>
+  <div class="status" id="status-prefs"></div>
+  <p class="err" id="err-prefs"></p>
+</div>
+
+<!-- SCREEN 2: ingredience + 3 recepty -->
+<div id="screen-recipes" class="screen">
+  <p class="section-head">Nalezené ingredience</p>
+  <div class="ing-grid" id="ing-grid"></div>
+
+  <p class="section-head" style="margin-top:1.5rem">Navrhované recepty</p>
+  <div class="recipe-cards" id="recipe-cards"></div>
+
+  <div class="actions-row">
+    <button class="btn" onclick="goBack()">Nová fotka</button>
+    <button class="btn btn-gold" id="other-btn" onclick="otherRecipes()">Jiné recepty</button>
+  </div>
+  <div class="status" id="status2"></div>
+  <p class="err" id="err2"></p>
+</div>
+
+<!-- SCREEN 3: detail receptu -->
+<div id="screen-detail" class="screen">
+  <div class="detail-hero">
+    <div class="detail-emoji" id="d-emoji"></div>
+    <div class="detail-name" id="d-name"></div>
+    <div class="detail-origin" id="d-origin"></div>
+    <div class="detail-desc" id="d-desc"></div>
+    <div class="detail-meta" id="d-meta"></div>
+  </div>
+  <div class="detail-section">
+    <p class="section-head" style="margin-top:0">Použít z lednice</p>
+    <ul class="ilist" id="d-needed"></ul>
+  </div>
+  <div id="d-extra-wrap" class="detail-section" style="display:none">
+    <p class="section-head" style="margin-top:0">Případně dokoupit</p>
+    <ul class="ilist dim" id="d-extra"></ul>
+  </div>
+  <div class="detail-section">
+    <p class="section-head" style="margin-top:0">Postup přípravy</p>
+    <ol class="slist" id="d-steps"></ol>
+  </div>
+  <div class="actions-row">
+    <button class="btn" onclick="showScreen('recipes')">← Zpět na recepty</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let stream = null;
+let imageB64 = null;
+let usedRecipes = [];
+
+window.addEventListener('load', () => {
+  const k = localStorage.getItem('fc_key');
+  if (k) { $('api-key').value = k; }
+  $('settings-drawer').style.display = 'none';
+  updateKeyStatus();
+});
+
+function openSettings() {
+  $('settings-overlay').classList.add('open');
+  $('settings-drawer').style.display = 'block';
+}
+function closeSettings() {
+  $('settings-overlay').classList.remove('open');
+  $('settings-drawer').style.display = 'none';
+  $('api-key-input-wrap').style.display = 'none';
+}
+function toggleKeyInput() {
+  const wrap = $('api-key-input-wrap');
+  wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
+  if (wrap.style.display === 'block') $('api-key').focus();
+}
+function saveKey() {
+  const k = $('api-key').value.trim();
+  if (k) localStorage.setItem('fc_key', k);
+  updateKeyStatus();
+  $('api-key-input-wrap').style.display = 'none';
+}
+function updateKeyStatus() {
+  const k = localStorage.getItem('fc_key');
+  const dot = $('key-dot');
+  const lbl = $('key-label');
+  if (k) {
+    dot.className = 'dot ok';
+    lbl.textContent = 'Klíč nastaven (' + k.slice(0,10) + '…)';
+  } else {
+    dot.className = 'dot';
+    lbl.textContent = 'Klikni pro zadání klíče';
+  }
+}
+
+function getKey() {
+  const k = localStorage.getItem('fc_key') || $('api-key').value.trim();
+  if (!k) {
+    openSettings();
+    toggleKeyInput();
+    return null;
+  }
+  return k;
+}
+
+function showStatus(id, html) { $(id).innerHTML = html; }
+function showErr(msg, id) { $(id || 'err').textContent = msg; }
+function clearMsg(id1, id2) {
+  if($(id1)) $(id1).innerHTML = '';
+  if(id2 && $(id2)) $(id2).textContent = '';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+  $('back-btn').style.display = name !== 'camera' ? 'block' : 'none';
+  $('header-sub').textContent = name === 'camera' ? 'Vyfoť lednici, dostaneš recept'
+    : name === 'prefs'   ? 'Upřesni své preference'
+    : name === 'recipes' ? 'Vyber recept'
+    : 'Detail receptu';
+}
+
+function setBtns(mode) {
+  $('btns-start').style.display = mode === 'start' ? 'flex' : 'none';
+  $('btns-live').style.display  = mode === 'live'  ? 'flex' : 'none';
+  $('btns-taken').style.display = mode === 'taken' ? 'flex' : 'none';
+}
+
+function startCamera() {
+  clearMsg('status', 'err');
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
+    .then(s => {
+      stream = s;
+      const v = $('video');
+      v.srcObject = s;
+      v.style.display = 'block';
+      $('placeholder').style.display = 'none';
+      $('preview').style.display = 'none';
+      setBtns('live');
+      showStatus('status', 'Namiř na lednici...');
+    })
+    .catch(e => showErr('Kamera není dostupná (' + (e.name||e) + '). Použij "Ze souboru".', 'err'));
+}
+
+function stopCamera() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+
+function capture() {
+  const v = $('video'), c = $('canvas');
+  c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
+  c.getContext('2d').drawImage(v, 0, 0);
+  imageB64 = c.toDataURL('image/jpeg', 0.85).split(',')[1];
+  $('preview').src = 'data:image/jpeg;base64,' + imageB64;
+  $('preview').style.display = 'block';
+  v.style.display = 'none';
+  stopCamera();
+  setBtns('taken');
+  showStatus('status', 'Foto pořízeno — klikni na Analyzovat');
+}
+
+function loadFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  clearMsg('status', 'err');
+  const reader = new FileReader();
+  reader.onload = ev => {
+    imageB64 = ev.target.result.split(',')[1];
+    $('preview').src = ev.target.result;
+    $('preview').style.display = 'block';
+    $('placeholder').style.display = 'none';
+    $('video').style.display = 'none';
+    stopCamera(); setBtns('taken');
+    showStatus('status', 'Foto nahráno — klikni na Analyzovat');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function retake() {
+  stopCamera(); imageB64 = null; usedRecipes = [];
+  $('preview').style.display = 'none';
+  $('video').style.display = 'none';
+  $('placeholder').style.display = 'block';
+  setBtns('start'); clearMsg('status', 'err');
+  showScreen('camera');
+}
+
+function goBack() {
+  const active = document.querySelector('.screen.active');
+  if (active && active.id === 'screen-detail') { showScreen('recipes'); return; }
+  if (active && active.id === 'screen-recipes') { showScreen('prefs'); return; }
+  retake();
+}
+
+/* ── STEP 1: detect ingredients ── */
+async function analyze() {
+  const key = getKey(); if (!key) return;
+  if (!imageB64) { showErr('Nejdřív pořiď nebo nahraj fotku.', 'err'); return; }
+  clearMsg('status', 'err');
+  usedRecipes = [];
+  $('analyze-btn').disabled = true;
+  showStatus('status', '<span class="spinner"></span> Analyzuji obsah lednice...');
+
+  try {
+    const res = await callAPI(key, [
+      { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageB64 } },
+      { type: 'text', text: `Podívej se na tuto fotku lednice a vypiš všechny ingredience které vidíš.
+Odpověz POUZE jako JSON bez markdown:
+{"ingredients":["ingredience1","ingredience2","..."]}` }
+    ]);
+
+    const data = parseJSON(res);
+    const ings = data.ingredients || [];
+
+    renderIngredients(ings);
+    // show prefs screen, not recipes yet
+    $('ing-grid-prefs').innerHTML = $('ing-grid').innerHTML;
+    showScreen('prefs');
+
+  } catch(e) {
+    showStatus('status', '');
+    showErr('Chyba: ' + (e.message || String(e)), 'err');
+  } finally {
+    $('analyze-btn').disabled = false;
+  }
+}
+
+/* ── STEP 2: get 3 recipes ── */
+async function fetchRecipes(key, ingredients, exclude, prefs) {
+  showStatus('status2', '<span class="spinner"></span> Hledám recepty...');
+  $('other-btn').disabled = true;
+
+  const excludeNote = exclude.length
+    ? `\nTyto recepty NESMÍŠ navrhnout (již byly zobrazeny): ${exclude.join(', ')}` : '';
+
+  const moodNote = prefs && prefs.mood
+    ? `\nNálada / styl jídla: "${prefs.mood}" — přizpůsob tomu výběr jídel.` : '';
+
+  const cuisineNote = prefs && prefs.cuisine && prefs.cuisine.length
+    ? `\nPreferovaná kuchyně: ${prefs.cuisine.join(', ')} — navrhuj recepty z těchto kuchyní. Pokud to ingredience nedovolují, zvol nejbližší alternativu.` : '';
+
+  try {
+    const res = await callAPI(key, [
+      { type: 'text', text: `Jsi zkušený kuchař. Ze těchto ingrediencí: ${ingredients.join(', ')}
+Navrhni přesně 3 různá konkrétní tradiční nebo populární jídla.${excludeNote}${moodNote}${cuisineNote}
+
+Každé jídlo musí být skutečně existující z tradiční kuchyně.
+U ingrediencí VŽDY uveď přesnou gramáž nebo množství (např. "200 g kuřecích prsou", "2 vejce", "100 ml smetany").
+U každého kroku VŽDY uveď čas pokud je relevantní (např. "Smažte 5 minut na středním ohni", "Pečte 25 minut při 180 °C").
+Uveď celkový čas přípravy a čas vaření.
+
+Odpověz POUZE jako JSON bez markdown:
+{"recipes":[
+  {"emoji":"🍝","name":"Název jídla","origin":"Italská kuchyně","description":"Krátký popis 1 věta.","prep_time":"10 min","cook_time":"20 min","servings":"2 porce","needed":["200 g surovina1","2 ks surovina2"],"extra":["100 g co dokoupit"],"steps":["Krok 1 — vařte 5 minut","Krok 2","Krok 3","Krok 4","Krok 5"]},
+  {"emoji":"🥘","name":"Název jídla 2","origin":"Česká kuchyně","description":"Krátký popis.","prep_time":"15 min","cook_time":"30 min","servings":"2 porce","needed":["150 g surovina"],"extra":[],"steps":["Krok 1","Krok 2","Krok 3"]},
+  {"emoji":"🍲","name":"Název jídla 3","origin":"Asijská kuchyně","description":"Krátký popis.","prep_time":"10 min","cook_time":"15 min","servings":"2 porce","needed":["300 g surovina"],"extra":[],"steps":["Krok 1","Krok 2","Krok 3"]}
+]}` }
+    ]);
+
+    const data = parseJSON(res);
+    const recipes = data.recipes || [];
+
+    recipes.forEach(r => { if (!usedRecipes.includes(r.name)) usedRecipes.push(r.name); });
+    renderRecipeCards(recipes, ingredients);
+    showStatus('status2', '');
+    showScreen('recipes');
+
+  } catch(e) {
+    showStatus('status2', '');
+    showErr('Chyba při hledání receptů: ' + (e.message || String(e)), 'err2');
+  } finally {
+    $('other-btn').disabled = false;
+  }
+}
+
+async function otherRecipes() {
+  const key = getKey(); if (!key) return;
+  const ings = Array.from($('ing-grid').querySelectorAll('.ing-pill')).map(p => p.textContent);
+  const prefs = getSelectedPrefs();
+  await fetchRecipes(key, ings, [...usedRecipes], prefs);
+}
+
+function toggleTag(el, group) {
+  if (group === 'mood') {
+    // only one mood at a time
+    $('mood-tags').querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  }
+  el.classList.toggle('selected');
+}
+
+function getSelectedPrefs() {
+  const mood = Array.from($('mood-tags').querySelectorAll('.tag.selected')).map(t => t.textContent.replace(/^.+?\s/,'').trim());
+  const cuisine = Array.from($('cuisine-tags').querySelectorAll('.tag.selected')).map(t => t.textContent.replace(/^.+?\s/,'').trim());
+  return { mood: mood[0] || null, cuisine: cuisine.length ? cuisine : null };
+}
+
+async function confirmPrefs() {
+  const key = getKey(); if (!key) return;
+  const ings = Array.from($('ing-grid-prefs').querySelectorAll('.ing-pill')).map(p => p.textContent);
+  const prefs = getSelectedPrefs();
+  usedRecipes = [];
+  await fetchRecipes(key, ings, [], prefs);
+}
+
+/* ── Render ── */
+function renderIngredients(ings) {
+  $('ing-grid').innerHTML = ings.map(i => `<span class="ing-pill">${esc(i)}</span>`).join('');
+}
+
+function renderRecipeCards(recipes, ings) {
+  $('recipe-cards').innerHTML = recipes.map((r, i) => `
+    <button class="recipe-card-btn" onclick="showDetail(${i})">
+      <span class="emoji">${r.emoji || '🍽️'}</span>
+      <div class="info">
+        <div class="rname">${esc(r.name)}</div>
+        <div class="rorigin">${esc(r.origin)}</div>
+        <div class="rdesc">${esc(r.description)}</div>
+        ${(r.prep_time || r.cook_time) ? `<div class="rtime">${[r.prep_time ? '⏱ '+r.prep_time : '', r.cook_time ? '🔥 '+r.cook_time : ''].filter(Boolean).join(' · ')}</div>` : ''}
+      </div>
+      <span class="arrow">›</span>
+    </button>`).join('');
+
+  window._currentRecipes = recipes;
+}
+
+function showDetail(idx) {
+  const r = window._currentRecipes[idx]; if (!r) return;
+  $('d-emoji').textContent = r.emoji || '🍽️';
+  $('d-name').textContent = r.name || '';
+  $('d-origin').textContent = r.origin || '';
+  $('d-desc').textContent = r.description || '';
+
+  const meta = [];
+  if (r.prep_time) meta.push(`⏱ Příprava: ${r.prep_time}`);
+  if (r.cook_time) meta.push(`🔥 Vaření: ${r.cook_time}`);
+  if (r.servings)  meta.push(`🍽 ${r.servings}`);
+  $('d-meta').innerHTML = meta.map(m => `<span class="meta-pill">${esc(m)}</span>`).join('');
+
+  $('d-needed').innerHTML = (r.needed||[]).map(i=>`<li>${esc(i)}</li>`).join('');
+  if (r.extra && r.extra.length) {
+    $('d-extra').innerHTML = r.extra.map(i=>`<li>${esc(i)}</li>`).join('');
+    $('d-extra-wrap').style.display = 'block';
+  } else {
+    $('d-extra-wrap').style.display = 'none';
+  }
+  $('d-steps').innerHTML = (r.steps||[]).map(s=>`<li>${esc(s)}</li>`).join('');
+  showScreen('detail');
+}
+
+/* ── Utils ── */
+async function callAPI(key, content) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content }]
+    })
+  });
+  if (!res.ok) {
+    let msg = 'HTTP ' + res.status;
+    try { const j = await res.json(); msg = j.error?.message || msg; } catch(_) {}
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  return (data.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+}
+
+function parseJSON(raw) {
+  const clean = raw.replace(/^```[a-z]*\n?/i, '').replace(/```$/, '').trim();
+  try { return JSON.parse(clean); } catch(_) {
+    const m = clean.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Nepodařilo se zparsovat odpověď AI.');
+    return JSON.parse(m[0]);
+  }
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
