@@ -597,6 +597,13 @@ function showCameraScreen() {
   clearMsg();
 }
 function showPrefsScreen() {
+  if (currentTab !== 'cook') {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $('tab-cook').classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    $('nav-cook').classList.add('active');
+    currentTab = 'cook';
+  }
   ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
   $('screen-prefs').style.display = 'block';
   $('back-btn').style.display = 'block';
@@ -604,6 +611,13 @@ function showPrefsScreen() {
   window.scrollTo(0,0);
 }
 function showRecipesScreen() {
+  if (currentTab !== 'cook') {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $('tab-cook').classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    $('nav-cook').classList.add('active');
+    currentTab = 'cook';
+  }
   ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
   $('screen-recipes').style.display = 'block';
   $('back-btn').style.display = 'block';
@@ -611,6 +625,13 @@ function showRecipesScreen() {
   window.scrollTo(0,0);
 }
 function showDetailScreen() {
+  if (currentTab !== 'cook') {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $('tab-cook').classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    $('nav-cook').classList.add('active');
+    currentTab = 'cook';
+  }
   ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
   $('screen-detail').style.display = 'block';
   $('back-btn').style.display = 'block';
@@ -759,15 +780,22 @@ async function confirmPrefs() {
 
 /* ══ FETCH 9 RECIPES ══ */
 async function fetchAllRecipes(key, ingredients, prefs) {
-  setStatus2('<span class="spinner"></span> Hledám recepty...');
-  $('other-btn') && ($('other-btn').disabled = true);
+  if (!ingredients || ingredients.length === 0) {
+    $('err-prefs').textContent = 'Žádné ingredience — vrať se a vyfotit lednici.';
+    return;
+  }
+
+  $('status-prefs').innerHTML = '<span class="spinner"></span> Hledám recepty...';
+  $('err-prefs').textContent = '';
+  const confirmBtn = document.querySelector('#screen-prefs .btn-gold');
+  if (confirmBtn) confirmBtn.disabled = true;
 
   const likes = getLikes();
   const dislikes = getDislikes();
   const moodNote = prefs?.mood ? `\nNálada: "${prefs.mood}"` : '';
   const cuisineNote = prefs?.cuisine?.length ? `\nKuchyně: ${prefs.cuisine.join(', ')}` : '';
   const diffNote = prefs?.difficulty ? `\nObtížnost: "${prefs.difficulty}"` : '';
-  const likesNote = likes.length ? `\nUživatel MÁ RÁD tyto styly jídel: ${likes.join(', ')} — navrhuj podobné.` : '';
+  const likesNote = likes.length ? `\nUživatel MÁ RÁD: ${likes.join(', ')} — navrhuj podobné.` : '';
   const dislikesNote = dislikes.length ? `\nUživatel NEMÁ RÁD: ${dislikes.join(', ')} — vyhni se podobným.` : '';
   const servingsNote = `\nRecept navrhni pro ${prefs?.servings||2} ${prefs?.servings===1?'osobu':prefs?.servings<=4?'osoby':'osob'}.`;
 
@@ -780,23 +808,25 @@ Každé jídlo musí být skutečně existující.
 U ingrediencí VŽDY uveď přesnou gramáž pro zadaný počet porcí.
 U každého kroku piš PODROBNÝ postup — teplota, čas, konzistence, barva jako signál hotovosti.
 Každý recept 6–8 kroků.
+difficulty musí být přesně jedno z: "easy", "medium", "hard".
 
-Odpověz POUZE jako JSON bez markdown:
-{"recipes":[
-  {"emoji":"🍝","name":"Název","origin":"Italská kuchyně","description":"1 věta.","difficulty":"easy","prep_time":"10 min","cook_time":"20 min","servings":${prefs?.servings||2},"needed":["200 g surovina"],"extra":["co dokoupit"],"steps":["Podrobný krok 1...","Krok 2..."],"nutrition":{"calories":450,"protein":22,"carbs":55,"fat":18}},
-  ... dalších 8 receptů stejná struktura
-]}` }
+Odpověz POUZE jako platný JSON objekt bez markdown, bez komentářů:
+{"recipes":[{"emoji":"🍝","name":"Název","origin":"Italská kuchyně","description":"1 věta.","difficulty":"easy","prep_time":"10 min","cook_time":"20 min","servings":${prefs?.servings||2},"needed":["200 g surovina"],"extra":["co dokoupit"],"steps":["Podrobný krok 1","Krok 2","Krok 3","Krok 4","Krok 5","Krok 6"],"nutrition":{"calories":450,"protein":22,"carbs":55,"fat":18}}]}
+
+Vrať přesně 9 receptů.` }
     ]);
     const data = parseJSON(res);
     allRecipes = data.recipes || [];
+    if (allRecipes.length === 0) throw new Error('AI nevrátila žádné recepty. Zkus to znovu.');
     recipePageIndex = 0;
     renderCurrentPage();
+    $('status-prefs').innerHTML = '';
     showRecipesScreen();
-    setStatus2('');
   } catch(e) {
-    setStatus2(''); setErr2('Chyba: ' + (e.message||String(e)));
+    $('status-prefs').innerHTML = '';
+    $('err-prefs').textContent = 'Chyba: ' + (e.message||String(e));
   } finally {
-    $('other-btn') && ($('other-btn').disabled = false);
+    if (confirmBtn) confirmBtn.disabled = false;
   }
 }
 
