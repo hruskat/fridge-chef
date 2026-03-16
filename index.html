@@ -682,7 +682,7 @@ function capture() {
   const v = $('video'), c = $('canvas');
   c.width = v.videoWidth||640; c.height = v.videoHeight||480;
   c.getContext('2d').drawImage(v,0,0);
-  imageB64 = c.toDataURL('image/jpeg',0.85).split(',')[1];
+  imageB64 = compressImage(c);
   $('preview').src = 'data:image/jpeg;base64,' + imageB64;
   $('preview').style.display = 'block';
   $('video').style.display = 'none';
@@ -694,16 +694,42 @@ function loadFile(e) {
   clearMsg();
   const r = new FileReader();
   r.onload = ev => {
-    imageB64 = ev.target.result.split(',')[1];
-    $('preview').src = ev.target.result;
-    $('preview').style.display = 'block';
-    $('placeholder').style.display = 'none';
-    $('video').style.display = 'none';
-    stopCamera(); setBtns('taken');
-    setStatus('Foto nahráno — klikni na Analyzovat');
+    const img = new Image();
+    img.onload = () => {
+      const c = $('canvas');
+      const maxW = 1024, maxH = 1024;
+      let w = img.width, h = img.height;
+      if (w > maxW || h > maxH) {
+        const ratio = Math.min(maxW/w, maxH/h);
+        w = Math.round(w*ratio); h = Math.round(h*ratio);
+      }
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      imageB64 = compressImage(c);
+      $('preview').src = 'data:image/jpeg;base64,' + imageB64;
+      $('preview').style.display = 'block';
+      $('placeholder').style.display = 'none';
+      $('video').style.display = 'none';
+      stopCamera(); setBtns('taken');
+      setStatus('Foto nahráno — klikni na Analyzovat');
+    };
+    img.src = ev.target.result;
   };
   r.readAsDataURL(file);
   e.target.value = '';
+}
+
+function compressImage(canvas) {
+  const maxW = 1024, maxH = 1024;
+  let w = canvas.width, h = canvas.height;
+  if (w > maxW || h > maxH) {
+    const ratio = Math.min(maxW/w, maxH/h);
+    const c2 = document.createElement('canvas');
+    c2.width = Math.round(w*ratio); c2.height = Math.round(h*ratio);
+    c2.getContext('2d').drawImage(canvas, 0, 0, c2.width, c2.height);
+    return c2.toDataURL('image/jpeg', 0.8).split(',')[1];
+  }
+  return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 }
 function retake() {
   stopCamera(); imageB64 = null;
@@ -802,18 +828,19 @@ async function fetchAllRecipes(key, ingredients, prefs) {
   try {
     const res = await callAPI(key, [
       { type: 'text', text: `Jsi zkušený kuchař. Ze ingrediencí: ${ingredients.join(', ')}
-Navrhni přesně 9 různých konkrétních tradičních nebo populárních jídel.${moodNote}${cuisineNote}${diffNote}${likesNote}${dislikesNote}${servingsNote}
+Navrhni přesně 6 různých konkrétních tradičních jídel.${moodNote}${cuisineNote}${diffNote}${likesNote}${dislikesNote}${servingsNote}
 
-Každé jídlo musí být skutečně existující.
-U ingrediencí VŽDY uveď přesnou gramáž pro zadaný počet porcí.
-U každého kroku piš PODROBNÝ postup — teplota, čas, konzistence, barva jako signál hotovosti.
-Každý recept 6–8 kroků.
-difficulty musí být přesně jedno z: "easy", "medium", "hard".
+Pravidla:
+- Jídlo musí skutečně existovat v tradiční kuchyni
+- U ingrediencí uveď gramáž pro zadaný počet porcí
+- Každý krok: konkrétní teplota nebo čas (např. "5 min na středním ohni")
+- Přesně 5 kroků na recept
+- difficulty: "easy", "medium" nebo "hard"
 
-Odpověz POUZE jako platný JSON objekt bez markdown, bez komentářů:
-{"recipes":[{"emoji":"🍝","name":"Název","origin":"Italská kuchyně","description":"1 věta.","difficulty":"easy","prep_time":"10 min","cook_time":"20 min","servings":${prefs?.servings||2},"needed":["200 g surovina"],"extra":["co dokoupit"],"steps":["Podrobný krok 1","Krok 2","Krok 3","Krok 4","Krok 5","Krok 6"],"nutrition":{"calories":450,"protein":22,"carbs":55,"fat":18}}]}
+Odpověz POUZE jako platný JSON bez markdown:
+{"recipes":[{"emoji":"🍝","name":"Název","origin":"Italská","description":"1 věta.","difficulty":"easy","prep_time":"10 min","cook_time":"20 min","servings":${prefs?.servings||2},"needed":["200 g surovina"],"extra":[],"steps":["Krok 1","Krok 2","Krok 3","Krok 4","Krok 5"],"nutrition":{"calories":450,"protein":22,"carbs":55,"fat":18}}]}
 
-Vrať přesně 9 receptů.` }
+Vrať přesně 6 receptů v poli recipes.` }
     ]);
     const data = parseJSON(res);
     allRecipes = data.recipes || [];
@@ -1146,23 +1173,38 @@ async function callAPI(key, content) {
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:3000, messages:[{role:'user',content}] })
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:8000, messages:[{role:'user',content}] })
   });
+
+  let data;
+  try { data = await res.json(); } catch(e) { throw new Error('Server neodpověděl správně (parse: ' + e.message + '). Zkus to znovu.'); }
+
   if (!res.ok) {
-    let msg = 'HTTP ' + res.status;
-    try { const j = await res.json(); msg = j.error?.message||msg; } catch(_) {}
+    const msg = data?.error?.message || data?.error?.type || ('HTTP chyba ' + res.status);
     throw new Error(msg);
   }
-  const data = await res.json();
-  return (data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
+
+  if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
+    throw new Error('Prázdná odpověď od AI (stop: ' + (data.stop_reason||'?') + '). Zkus to znovu.');
+  }
+
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('Odpověď AI byla příliš dlouhá. Zkus to znovu.');
+  }
+
+  const text = data.content.map(b=>b.type==='text'?b.text:'').join('').trim();
+  if (!text) throw new Error('AI nevrátila žádný text. Zkus to znovu.');
+  return text;
 }
 
 function parseJSON(raw) {
   const clean = raw.replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
   try { return JSON.parse(clean); } catch(_) {
     const m = clean.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('Nepodařilo se zparsovat odpověď AI. Zkus to znovu.');
-    return JSON.parse(m[0]);
+    if (!m) throw new Error('AI nevrátila správný formát. Zkus to znovu.');
+    try { return JSON.parse(m[0]); } catch(_) {
+      throw new Error('Chyba při čtení odpovědi AI. Zkus to znovu.');
+    }
   }
 }
 
