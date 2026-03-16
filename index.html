@@ -7,295 +7,287 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Fridge Chef</title>
 <style>
-  :root {
-    --bg: #0f0f0d;
-    --bg2: #1a1a16;
-    --bg3: #242420;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.15);
-    --text: #f0ede6;
-    --text2: #9a9590;
-    --text3: #5a5550;
-    --accent: #c8a96e;
-    --green-light: #a8d4b4;
-    --radius: 16px;
-    --radius-sm: 10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 0 3rem;
-  }
-  header {
-    padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; flex: 1; }
-  header h1 span { color: var(--accent); }
-  header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
-  #back-btn {
-    display: none;
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-sm);
-    color: var(--text2);
-    font-size: 13px;
-    padding: 6px 12px;
-    cursor: pointer;
-  }
-  #settings-btn {
-    width: 36px; height: 36px;
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 50%;
-    color: var(--text2);
-    font-size: 17px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
+:root {
+  --bg: #0f0f0d;
+  --bg2: #1a1a16;
+  --bg3: #242420;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --text: #f0ede6;
+  --text2: #9a9590;
+  --text3: #5a5550;
+  --accent: #c8a96e;
+  --green: #4a7c59;
+  --green-light: #a8d4b4;
+  --red: #e07060;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --nav-h: 64px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-bottom: calc(var(--nav-h) + 1rem);
+}
 
-  /* settings drawer */
-  #settings-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 100;
-  }
-  #settings-overlay.open { display: block; }
-  #settings-drawer {
-    position: fixed;
-    bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 480px;
-    background: var(--bg2);
-    border-top: 1px solid var(--border2);
-    border-radius: 20px 20px 0 0;
-    padding: 1.5rem;
-    z-index: 101;
-    transition: transform 0.25s ease;
-  }
-  #settings-drawer h3 { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); }
-  #settings-drawer .close-btn {
-    position: absolute; top: 1.25rem; right: 1.25rem;
-    background: var(--bg3); border: none; border-radius: 50%;
-    width: 28px; height: 28px; font-size: 16px; color: var(--text2);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  #api-key-status {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg3); border: 1px solid var(--border2);
-    border-radius: var(--radius-sm); padding: 10px 12px;
-    font-size: 13px; color: var(--text2); margin-bottom: 8px;
-    cursor: pointer;
-  }
-  #api-key-status .dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    background: var(--text3);
-  }
-  #api-key-status .dot.ok { background: var(--green-light); }
-  #api-key-input-wrap { display: none; }
-  #api-key-input-wrap input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-size: 13px;
-    padding: 9px 12px;
-    outline: none;
-    -webkit-appearance: none;
-    margin-bottom: 6px;
-  }
-  #api-key-input-wrap input:focus { border-color: var(--accent); }
-  .drawer-save-btn {
-    width: 100%; padding: 11px;
-    background: var(--accent); border: none; border-radius: var(--radius-sm);
-    color: #1a1208; font-size: 15px; font-weight: 600; cursor: pointer;
-    margin-top: 4px;
-  }
+/* ── HEADER ── */
+header {
+  padding: 1.25rem 1.25rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 50;
+}
+header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; flex: 1; }
+header h1 span { color: var(--accent); }
+#header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+#back-btn {
+  display: none;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 13px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+#settings-btn {
+  width: 34px; height: 34px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  color: var(--text2);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 
-  .screen { display: none; padding: 1.25rem 1.5rem; }
-  .screen.active { display: block; }
+/* ── BOTTOM NAV ── */
+#bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  height: var(--nav-h);
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 50;
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 4px;
+  color: var(--text3);
+  font-size: 10px;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+.nav-btn .nav-ico { font-size: 20px; }
+.nav-btn.active { color: var(--accent); }
 
-  /* CAMERA */
-  .camera-box {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .camera-box video, .camera-box img { width: 100%; display: block; }
-  .placeholder { text-align: center; padding: 2rem 1.5rem; }
-  .placeholder .ico { font-size: 36px; margin-bottom: 0.75rem; }
-  .placeholder p { font-size: 14px; color: var(--text2); line-height: 1.5; }
+/* ── SCREENS ── */
+.screen { display: none; padding: 1.25rem; }
+.screen.active { display: block; }
 
-  .btn-row { display: flex; gap: 10px; margin-top: 1rem; }
-  .btn {
-    flex: 1;
-    padding: 12px 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border2);
-    background: var(--bg2);
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    -webkit-appearance: none;
-    transition: opacity 0.15s;
-  }
-  .btn:active { opacity: 0.7; }
-  .btn:disabled { opacity: 0.3; cursor: default; }
-  .btn-gold { background: var(--accent); border-color: var(--accent); color: #1a1208; }
-  label.btn { display: block; cursor: pointer; }
+/* ── SETTINGS DRAWER ── */
+#settings-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; }
+#settings-overlay.open { display: block; }
+#settings-drawer {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: var(--bg2); border-top: 1px solid var(--border2);
+  border-radius: 20px 20px 0 0; padding: 1.5rem;
+  z-index: 101;
+}
+#settings-drawer h3 { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; }
+.drawer-close {
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  background: var(--bg3); border: none; border-radius: 50%;
+  width: 28px; height: 28px; font-size: 16px; color: var(--text2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+#api-key-status {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  font-size: 13px; color: var(--text2); cursor: pointer; margin-bottom: 8px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--text3); }
+.dot.ok { background: var(--green-light); }
+#api-key-input-wrap { display: none; }
+#api-key-input-wrap input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--text); font-size: 13px;
+  padding: 9px 12px; outline: none; -webkit-appearance: none; margin-bottom: 6px;
+}
+#api-key-input-wrap input:focus { border-color: var(--accent); }
+.drawer-save { width: 100%; padding: 11px; background: var(--accent); border: none; border-radius: var(--radius-sm); color: #1a1208; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.lbl { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 6px; }
+.hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
 
-  .status {
-    margin-top: 1rem;
-    font-size: 13px;
-    color: var(--text2);
-    text-align: center;
-    min-height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .spinner {
-    width: 14px; height: 14px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-    display: inline-block;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .err { color: #e07060; font-size: 13px; text-align: center; margin-top: 0.5rem; min-height: 18px; }
+/* ── CAMERA ── */
+.camera-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  min-height: 200px; display: flex; align-items: center; justify-content: center;
+}
+.camera-box video, .camera-box img { width: 100%; display: block; }
+.placeholder { text-align: center; padding: 1.75rem 1.25rem; }
+.placeholder .ico { font-size: 38px; margin-bottom: 0.6rem; }
+.placeholder .ptitle { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 5px; line-height: 1.3; }
+.placeholder .pacc { color: var(--accent); font-size: 13px; font-weight: 500; }
+.placeholder .phint { color: var(--text2); font-size: 12px; background: rgba(255,255,255,0.04); border-radius: 8px; padding: 7px 10px; margin-top: 8px; line-height: 1.6; }
 
-  /* INGREDIENTS */
-  .section-head {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--text3);
-    margin-bottom: 0.75rem;
-    margin-top: 1.25rem;
-  }
-  .section-head:first-child { margin-top: 0; }
+/* mode toggle */
+.mode-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+.mode-btn {
+  flex: 1; padding: 9px 8px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border2); background: var(--bg2);
+  color: var(--text2); font-size: 13px; cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+.mode-btn.active { background: var(--bg3); border-color: var(--accent); color: var(--accent); }
 
-  .ing-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .ing-pill {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 13px;
-    color: var(--text);
-  }
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 8px; margin-top: 0.75rem; }
+.btn {
+  flex: 1; padding: 12px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border2); background: var(--bg2);
+  color: var(--text); font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: center; -webkit-appearance: none;
+  transition: opacity 0.15s; font-family: inherit;
+}
+.btn:active { opacity: 0.7; }
+.btn:disabled { opacity: 0.3; cursor: default; }
+.btn-gold { background: var(--accent); border-color: var(--accent); color: #1a1208; }
+label.btn { display: block; cursor: pointer; }
 
-  /* RECIPE CARDS */
-  .recipe-cards { display: flex; flex-direction: column; gap: 10px; }
-  .recipe-card-btn {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transition: border-color 0.15s, background 0.15s;
-    width: 100%;
-    text-align: left;
-    -webkit-appearance: none;
-  }
-  .recipe-card-btn:active { background: var(--bg3); border-color: var(--accent); }
-  .recipe-card-btn .emoji { font-size: 32px; flex-shrink: 0; }
-  .recipe-card-btn .info { flex: 1; }
-  .recipe-card-btn .rname { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-  .recipe-card-btn .rorigin { font-size: 12px; color: var(--accent); }
-  .recipe-card-btn .rdesc { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
-  .recipe-card-btn .rtime { font-size: 12px; color: var(--text3); margin-top: 5px; }
-  .recipe-card-btn .arrow { color: var(--text3); font-size: 18px; flex-shrink: 0; }
+/* ── STATUS / ERR ── */
+.status { margin-top: 0.75rem; font-size: 13px; color: var(--text2); text-align: center; min-height: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.err { color: var(--red); font-size: 13px; text-align: center; margin-top: 0.4rem; min-height: 18px; }
 
-  .actions-row { display: flex; gap: 10px; margin-top: 1.25rem; }
+/* ── SECTION HEAD ── */
+.sec { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin: 1rem 0 0.5rem; }
+.sec:first-child { margin-top: 0; }
 
-  /* RECIPE DETAIL */
-  .detail-hero {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .detail-emoji { font-size: 48px; margin-bottom: 0.75rem; }
-  .detail-name { font-size: 24px; font-weight: 600; line-height: 1.2; margin-bottom: 4px; }
-  .detail-origin { font-size: 13px; color: var(--accent); margin-bottom: 0.5rem; }
-  .detail-desc { font-size: 14px; color: var(--text2); line-height: 1.6; }
-  .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.75rem; }
-  .meta-pill { background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: var(--text2); }
+/* ── INGREDIENTS ── */
+.ing-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.ing-pill { background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 10px; font-size: 13px; color: var(--text); }
 
-  .detail-section {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    margin-bottom: 0.75rem;
-  }
-  ul.ilist, ol.slist { list-style: none; padding: 0; }
-  ul.ilist li, ol.slist li {
-    font-size: 14px; color: var(--text);
-    padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5;
-  }
-  ul.ilist li:last-child, ol.slist li:last-child { border-bottom: none; }
-  ul.ilist li { display: flex; align-items: flex-start; gap: 8px; }
-  ul.ilist li::before { content: ''; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
-  ul.ilist.dim li::before { background: var(--text3); }
-  ol.slist { counter-reset: s; }
-  ol.slist li { counter-increment: s; padding-left: 2.25rem; position: relative; }
-  ol.slist li::before {
-    content: counter(s); position: absolute; left: 0; top: 7px;
-    width: 20px; height: 20px; background: var(--bg3); border: 1px solid var(--border2);
-    border-radius: 50%; font-size: 11px; font-weight: 500; color: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-  }
+/* ── TAGS ── */
+.tag-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.tag {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 6px 13px; font-size: 13px;
+  color: var(--text2); cursor: pointer; -webkit-appearance: none; transition: all 0.15s;
+}
+.tag:active { opacity: 0.7; }
+.tag.selected { background: var(--accent); border-color: var(--accent); color: #1a1208; }
 
-  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tag {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    padding: 7px 14px;
-    font-size: 14px;
-    color: var(--text2);
-    cursor: pointer;
-    -webkit-appearance: none;
-    transition: all 0.15s;
-  }
-  .tag:active { opacity: 0.7; }
-  .tag.selected {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #1a1208;
-  }
+/* ── SLIDER ── */
+.slider-row { display: flex; align-items: center; gap: 10px; margin: 4px 0 8px; }
+.slider-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+.slider-row input[type=range] { flex: 1; accent-color: var(--accent); }
+.slider-val { font-size: 14px; font-weight: 600; color: var(--accent); min-width: 24px; text-align: right; }
 
-  canvas { display: none; }
+/* ── RECIPE CARDS ── */
+.recipe-cards { display: flex; flex-direction: column; gap: 8px; }
+.rcard {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.1rem;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; width: 100%; text-align: left; -webkit-appearance: none;
+  transition: border-color 0.15s;
+}
+.rcard:active { border-color: var(--accent); }
+.rcard .emo { font-size: 30px; flex-shrink: 0; }
+.rcard .info { flex: 1; min-width: 0; }
+.rcard .rname { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.rcard .rorigin { font-size: 12px; color: var(--accent); }
+.rcard .rdesc { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.4; }
+.rcard .rmeta { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+.rmeta-pill { font-size: 11px; color: var(--text3); background: var(--bg3); border-radius: 20px; padding: 2px 8px; }
+.rmeta-pill.easy { color: #a8d4b4; }
+.rmeta-pill.medium { color: var(--accent); }
+.rmeta-pill.hard { color: var(--red); }
+.rcard .ricons { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+.star-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 2px; line-height: 1; }
+.rcard .arr { color: var(--text3); font-size: 16px; }
+
+/* ── DETAIL ── */
+.detail-hero { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem; }
+.detail-emoji { font-size: 44px; margin-bottom: 0.6rem; }
+.detail-name { font-size: 22px; font-weight: 600; line-height: 1.2; margin-bottom: 4px; }
+.detail-origin { font-size: 13px; color: var(--accent); margin-bottom: 0.5rem; }
+.detail-desc { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.detail-meta { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 0.75rem; }
+.meta-pill { background: var(--bg2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 11px; font-size: 12px; color: var(--text2); }
+
+.detail-section { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: 0.75rem; }
+ul.ilist, ol.slist { list-style: none; padding: 0; }
+ul.ilist li, ol.slist li { font-size: 14px; color: var(--text); padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+ul.ilist li:last-child, ol.slist li:last-child { border-bottom: none; }
+ul.ilist li { display: flex; align-items: flex-start; gap: 8px; }
+ul.ilist li::before { content: ''; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+ul.ilist.dim li::before { background: var(--text3); }
+ol.slist { counter-reset: s; }
+ol.slist li { counter-increment: s; padding-left: 2.25rem; position: relative; }
+ol.slist li::before { content: counter(s); position: absolute; left: 0; top: 7px; width: 20px; height: 20px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 50%; font-size: 11px; font-weight: 500; color: var(--accent); display: flex; align-items: center; justify-content: center; }
+
+/* nutrition */
+.nutrition-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.nutr-card { background: var(--bg3); border-radius: var(--radius-sm); padding: 8px 6px; text-align: center; }
+.nutr-val { font-size: 16px; font-weight: 600; color: var(--text); }
+.nutr-lbl { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* like/dislike */
+.vote-row { display: flex; gap: 8px; margin-top: 0.75rem; }
+.vote-btn { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--bg2); color: var(--text2); font-size: 18px; cursor: pointer; text-align: center; transition: all 0.15s; font-family: inherit; }
+.vote-btn:active { opacity: 0.7; }
+.vote-btn.liked { background: rgba(74,124,89,0.2); border-color: var(--green); color: var(--green-light); }
+.vote-btn.disliked { background: rgba(224,112,96,0.15); border-color: var(--red); color: var(--red); }
+
+/* ── OBLÍBENÉ / HISTORIE ── */
+.empty-state { text-align: center; padding: 3rem 1rem; }
+.empty-state .eico { font-size: 40px; margin-bottom: 0.75rem; }
+.empty-state p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.saved-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer; }
+.saved-card:active { border-color: var(--accent); }
+.saved-card .emo { font-size: 26px; flex-shrink: 0; }
+.saved-card .info { flex: 1; min-width: 0; }
+.saved-card .sname { font-size: 14px; font-weight: 600; color: var(--text); }
+.saved-card .smeta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.saved-card .del-btn { background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+
+/* ── TÝDENNÍ PLÁN ── */
+.week-grid { display: flex; flex-direction: column; gap: 6px; }
+.week-day { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.week-day:active { border-color: var(--accent); }
+.week-day .day-name { font-size: 12px; color: var(--text3); width: 32px; flex-shrink: 0; }
+.week-day .day-meal { font-size: 14px; color: var(--text); flex: 1; }
+.week-day .day-emo { font-size: 20px; flex-shrink: 0; }
+.week-day .day-arr { color: var(--text3); font-size: 14px; }
+
+canvas { display: none; }
 </style>
 </head>
 <body>
@@ -303,17 +295,16 @@
 <header>
   <div style="flex:1">
     <h1>Fridge <span>Chef</span> 👨‍🍳</h1>
-    <p id="header-sub">Nevíš co dnes ukuchtit?</p>
+    <p id="header-sub"></p>
   </div>
   <button id="back-btn" onclick="goBack()">← Zpět</button>
-  <button id="settings-btn" onclick="openSettings()" title="Nastavení">⚙</button>
+  <button id="settings-btn" onclick="openSettings()">⚙</button>
 </header>
 
-<!-- settings drawer -->
-<div id="settings-overlay" onclick="closeSettings()">
-</div>
-<div id="settings-drawer">
-  <button class="close-btn" onclick="closeSettings()">✕</button>
+<!-- SETTINGS DRAWER -->
+<div id="settings-overlay" onclick="closeSettings()"></div>
+<div id="settings-drawer" style="display:none">
+  <button class="drawer-close" onclick="closeSettings()">✕</button>
   <h3>Nastavení</h3>
   <span class="lbl">API klíč</span>
   <div id="api-key-status" onclick="toggleKeyInput()">
@@ -322,59 +313,73 @@
   </div>
   <div id="api-key-input-wrap">
     <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off" />
-    <p class="hint" style="margin-bottom:8px">Klíč se uloží jen do tohoto prohlížeče.</p>
-    <button class="drawer-save-btn" onclick="saveKey()">Uložit</button>
+    <p class="hint">Klíč se uloží jen do tohoto prohlížeče.</p>
+    <button class="drawer-save" onclick="saveKey()">Uložit</button>
   </div>
 </div>
 
-<!-- SCREEN 1: kamera -->
-<div id="screen-camera" class="screen active">
-  <div class="camera-box" id="camera-box">
-    <video id="video" autoplay playsinline muted style="display:none"></video>
-    <canvas id="canvas"></canvas>
-    <img id="preview" style="display:none" alt="náhled" />
-    <div class="placeholder" id="placeholder">
-      <div class="ico">🍽️</div>
-      <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Seš zoufalá nebo jen hledáš inspiraci? 🙂</p>
-      <p style="color:var(--accent)">Fridge Chef ti pomůže!</p>
-      <p style="margin-top:10px;font-size:13px;color:var(--text2);background:rgba(255,255,255,0.04);border-radius:10px;padding:8px 12px;line-height:1.6">Vyfoť lednici a za chvíli<br>máš 3 recepty přímo na míru</p>
+<!-- ══ TAB: VAŘIT ══ -->
+<div id="tab-cook" class="screen active">
+
+  <!-- SCREEN: kamera -->
+  <div id="screen-camera">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-fridge" onclick="setMode('fridge')">🧊 Z lednice</button>
+      <button class="mode-btn" id="mode-leftovers" onclick="setMode('leftovers')">🍱 Zbytky</button>
     </div>
-  </div>
-  <div id="btns-start" class="btn-row">
-    <button class="btn btn-gold" onclick="startCamera()">Spustit kameru</button>
-    <label class="btn">Ze souboru<input type="file" accept="image/*" style="display:none" onchange="loadFile(event)"></label>
-  </div>
-  <div id="btns-live" class="btn-row" style="display:none">
-    <button class="btn" onclick="retake()">Zrušit</button>
-    <button class="btn btn-gold" onclick="capture()">Vyfotit</button>
-  </div>
-  <div id="btns-taken" class="btn-row" style="display:none">
-    <button class="btn" onclick="retake()">Znovu</button>
-    <button class="btn btn-gold" id="analyze-btn" onclick="analyze()">Analyzovat</button>
-  </div>
-  <div class="status" id="status"></div>
-  <p class="err" id="err"></p>
-</div>
 
-<!-- SCREEN 1.5: preference -->
-<div id="screen-prefs" class="screen">
-  <p class="section-head">Nalezené ingredience</p>
-  <div class="ing-grid" id="ing-grid-prefs"></div>
+    <div class="camera-box" id="camera-box">
+      <video id="video" autoplay playsinline muted style="display:none"></video>
+      <canvas id="canvas"></canvas>
+      <img id="preview" style="display:none" alt="náhled" />
+      <div class="placeholder" id="placeholder">
+        <div class="ico">🍽️</div>
+        <div class="ptitle" id="placeholder-title">Seš zoufalá nebo<br>jen hledáš inspiraci? 🙂</div>
+        <div class="pacc">Fridge Chef ti pomůže!</div>
+        <div class="phint" id="placeholder-hint">Vyfoť lednici a za chvíli<br>máš 3 recepty přímo na míru</div>
+      </div>
+    </div>
 
-  <div style="margin-top:1.5rem">
-    <p class="section-head">Na co máš chuť?</p>
+    <!-- zbytky textarea -->
+    <div id="leftovers-input" style="display:none; margin-top:0.75rem">
+      <textarea id="leftovers-text" placeholder="Napiš co ti zbylo... např. vařená rýže, kuřecí prso, mrkev" style="width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;resize:none;height:80px;font-family:inherit;-webkit-appearance:none"></textarea>
+    </div>
+
+    <div id="btns-start" class="btn-row">
+      <button class="btn btn-gold" onclick="startCamera()">Spustit kameru</button>
+      <label class="btn">Ze souboru<input type="file" accept="image/*" style="display:none" onchange="loadFile(event)"></label>
+    </div>
+    <div id="btns-live" class="btn-row" style="display:none">
+      <button class="btn" onclick="retake()">Zrušit</button>
+      <button class="btn btn-gold" onclick="capture()">Vyfotit</button>
+    </div>
+    <div id="btns-taken" class="btn-row" style="display:none">
+      <button class="btn" onclick="retake()">Znovu</button>
+      <button class="btn btn-gold" id="analyze-btn" onclick="analyze()">Analyzovat</button>
+    </div>
+    <div id="btns-leftovers" class="btn-row" style="display:none">
+      <button class="btn btn-gold" onclick="analyzeLeftovers()">Najít recepty</button>
+    </div>
+    <div class="status" id="status"></div>
+    <p class="err" id="err"></p>
+  </div>
+
+  <!-- SCREEN: preference -->
+  <div id="screen-prefs" style="display:none">
+    <p class="sec">Nalezené ingredience</p>
+    <div class="ing-grid" id="ing-grid-prefs"></div>
+
+    <p class="sec" style="margin-top:1.25rem">Na co máš chuť?</p>
     <div class="tag-grid" id="mood-tags">
       <button class="tag" onclick="toggleTag(this,'mood')">🍳 Rychlé a jednoduché</button>
       <button class="tag" onclick="toggleTag(this,'mood')">🥗 Lehké a zdravé</button>
       <button class="tag" onclick="toggleTag(this,'mood')">🍖 Pořádné a sytné</button>
       <button class="tag" onclick="toggleTag(this,'mood')">🍰 Sladké</button>
       <button class="tag" onclick="toggleTag(this,'mood')">🥘 Polévka nebo vývar</button>
-      <button class="tag" onclick="toggleTag(this,'mood')">🔥 Něco pikantního</button>
+      <button class="tag" onclick="toggleTag(this,'mood')">🔥 Pikantní</button>
     </div>
-  </div>
 
-  <div style="margin-top:1.25rem">
-    <p class="section-head">Typ kuchyně?</p>
+    <p class="sec" style="margin-top:1.25rem">Typ kuchyně?</p>
     <div class="tag-grid" id="cuisine-tags">
       <button class="tag" onclick="toggleTag(this,'cuisine')">🇨🇿 Česká</button>
       <button class="tag" onclick="toggleTag(this,'cuisine')">🇮🇹 Italská</button>
@@ -385,361 +390,723 @@
       <button class="tag" onclick="toggleTag(this,'cuisine')">🫕 Americká</button>
       <button class="tag" onclick="toggleTag(this,'cuisine')">🍱 Japonská</button>
     </div>
+
+    <p class="sec" style="margin-top:1.25rem">Obtížnost?</p>
+    <div class="tag-grid" id="diff-tags">
+      <button class="tag" onclick="toggleTag(this,'diff')">😊 Snadné</button>
+      <button class="tag" onclick="toggleTag(this,'diff')">👨‍🍳 Střední</button>
+      <button class="tag" onclick="toggleTag(this,'diff')">🎓 Pokročilé</button>
+    </div>
+
+    <p class="sec" style="margin-top:1.25rem">Pro kolik osob?</p>
+    <div class="slider-row">
+      <label>Porce</label>
+      <input type="range" id="servings-slider" min="1" max="8" value="2" step="1" oninput="document.getElementById('servings-val').textContent=this.value">
+      <span class="slider-val" id="servings-val">2</span>
+    </div>
+
+    <div class="btn-row" style="margin-top:1.25rem">
+      <button class="btn" onclick="showCameraScreen()">Zpět</button>
+      <button class="btn btn-gold" onclick="confirmPrefs()">Najít recepty →</button>
+    </div>
+    <div class="status" id="status-prefs"></div>
+    <p class="err" id="err-prefs"></p>
   </div>
 
-  <div style="margin-top:1.5rem" class="btn-row">
-    <button class="btn" onclick="retake()">Nová fotka</button>
-    <button class="btn btn-gold" onclick="confirmPrefs()">Najít recepty →</button>
+  <!-- SCREEN: recepty -->
+  <div id="screen-recipes" style="display:none">
+    <p class="sec">Nalezené ingredience</p>
+    <div class="ing-grid" id="ing-grid"></div>
+    <p class="sec" style="margin-top:1.25rem">Navrhované recepty</p>
+    <div class="recipe-cards" id="recipe-cards"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn" onclick="showCameraScreen()">Nová fotka</button>
+      <button class="btn btn-gold" id="other-btn" onclick="showNextRecipes()">Jiné recepty</button>
+    </div>
+    <div class="status" id="status2"></div>
+    <p class="err" id="err2"></p>
   </div>
-  <div class="status" id="status-prefs"></div>
-  <p class="err" id="err-prefs"></p>
+
+  <!-- SCREEN: detail -->
+  <div id="screen-detail" style="display:none">
+    <div class="detail-hero">
+      <div class="detail-emoji" id="d-emoji"></div>
+      <div class="detail-name" id="d-name"></div>
+      <div class="detail-origin" id="d-origin"></div>
+      <div class="detail-desc" id="d-desc"></div>
+      <div class="detail-meta" id="d-meta"></div>
+    </div>
+
+    <div class="detail-section">
+      <p class="sec" style="margin-top:0">Pro kolik osob</p>
+      <div class="slider-row">
+        <label>Porce</label>
+        <input type="range" id="detail-servings" min="1" max="8" value="2" step="1" oninput="updateServings(this.value)">
+        <span class="slider-val" id="detail-servings-val">2</span>
+      </div>
+      <p class="sec">Použít z lednice</p>
+      <ul class="ilist" id="d-needed"></ul>
+    </div>
+
+    <div id="d-extra-wrap" class="detail-section" style="display:none">
+      <p class="sec" style="margin-top:0">Případně dokoupit</p>
+      <ul class="ilist dim" id="d-extra"></ul>
+    </div>
+
+    <div class="detail-section">
+      <p class="sec" style="margin-top:0">Nutriční hodnoty <span style="font-size:10px;color:var(--text3)">(na porci)</span></p>
+      <div class="nutrition-grid" id="d-nutrition"></div>
+    </div>
+
+    <div class="detail-section">
+      <p class="sec" style="margin-top:0">Postup přípravy</p>
+      <ol class="slist" id="d-steps"></ol>
+    </div>
+
+    <div class="detail-section">
+      <p class="sec" style="margin-top:0">Jak se ti recept líbil?</p>
+      <div class="vote-row">
+        <button class="vote-btn" id="vote-up" onclick="vote('up')">👍 Dobré</button>
+        <button class="vote-btn" id="vote-down" onclick="vote('down')">👎 Příště jinak</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="showRecipesScreen()">← Zpět na recepty</button>
+      <button class="btn btn-gold" id="fav-btn" onclick="toggleFavorite()">☆ Oblíbit</button>
+    </div>
+  </div>
+
 </div>
 
-<!-- SCREEN 2: ingredience + 3 recepty -->
-<div id="screen-recipes" class="screen">
-  <p class="section-head">Nalezené ingredience</p>
-  <div class="ing-grid" id="ing-grid"></div>
-
-  <p class="section-head" style="margin-top:1.5rem">Navrhované recepty</p>
-  <div class="recipe-cards" id="recipe-cards"></div>
-
-  <div class="actions-row">
-    <button class="btn" onclick="goBack()">Nová fotka</button>
-    <button class="btn btn-gold" id="other-btn" onclick="otherRecipes()">Jiné recepty</button>
-  </div>
-  <div class="status" id="status2"></div>
-  <p class="err" id="err2"></p>
+<!-- ══ TAB: OBLÍBENÉ ══ -->
+<div id="tab-favorites" class="screen">
+  <p class="sec">Oblíbené recepty</p>
+  <div id="favorites-list"></div>
 </div>
 
-<!-- SCREEN 3: detail receptu -->
-<div id="screen-detail" class="screen">
-  <div class="detail-hero">
-    <div class="detail-emoji" id="d-emoji"></div>
-    <div class="detail-name" id="d-name"></div>
-    <div class="detail-origin" id="d-origin"></div>
-    <div class="detail-desc" id="d-desc"></div>
-    <div class="detail-meta" id="d-meta"></div>
+<!-- ══ TAB: HISTORIE ══ -->
+<div id="tab-history" class="screen">
+  <p class="sec">Historie vaření</p>
+  <div id="history-list"></div>
+</div>
+
+<!-- ══ TAB: PLÁN TÝDNE ══ -->
+<div id="tab-plan" class="screen">
+  <div id="plan-empty">
+    <p class="sec">Týdenní plán jídel</p>
+    <div class="camera-box" style="margin-bottom:0.75rem">
+      <div class="placeholder">
+        <div class="ico">📅</div>
+        <div class="ptitle">Naplánuj si týden</div>
+        <div class="phint">Vyfoť lednici a AI navrhne<br>jídla na celý týden</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="startWeekPlan()">Vyfotit lednici</button>
+      <label class="btn">Ze souboru<input type="file" accept="image/*" style="display:none" onchange="loadWeekFile(event)"></label>
+    </div>
+    <div class="status" id="status-plan"></div>
+    <p class="err" id="err-plan"></p>
   </div>
-  <div class="detail-section">
-    <p class="section-head" style="margin-top:0">Použít z lednice</p>
-    <ul class="ilist" id="d-needed"></ul>
+  <div id="plan-result" style="display:none">
+    <p class="sec">Plán na tento týden</p>
+    <div class="week-grid" id="week-grid"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn" onclick="resetPlan()">Nový plán</button>
+    </div>
   </div>
-  <div id="d-extra-wrap" class="detail-section" style="display:none">
-    <p class="section-head" style="margin-top:0">Případně dokoupit</p>
-    <ul class="ilist dim" id="d-extra"></ul>
-  </div>
-  <div class="detail-section">
-    <p class="section-head" style="margin-top:0">Postup přípravy</p>
-    <ol class="slist" id="d-steps"></ol>
-  </div>
-  <div class="actions-row">
-    <button class="btn" onclick="showScreen('recipes')">← Zpět na recepty</button>
-  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="bottom-nav">
+  <button class="nav-btn active" id="nav-cook" onclick="switchTab('cook')">
+    <span class="nav-ico">🍳</span>Vařit
+  </button>
+  <button class="nav-btn" id="nav-favorites" onclick="switchTab('favorites')">
+    <span class="nav-ico">⭐</span>Oblíbené
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="switchTab('history')">
+    <span class="nav-ico">🕐</span>Historie
+  </button>
+  <button class="nav-btn" id="nav-plan" onclick="switchTab('plan')">
+    <span class="nav-ico">📅</span>Plán týdne
+  </button>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
+
+/* ══ STATE ══ */
 let stream = null;
 let imageB64 = null;
-let usedRecipes = [];
+let currentMode = 'fridge';
+let allRecipes = [];
+let recipePageIndex = 0;
+let currentRecipe = null;
+let currentIngredients = [];
+let currentServings = 2;
+let baseServings = 2;
+let currentTab = 'cook';
+let weekImageB64 = null;
 
+/* ══ INIT ══ */
 window.addEventListener('load', () => {
   const k = localStorage.getItem('fc_key');
-  if (k) { $('api-key').value = k; }
+  if (k) $('api-key').value = k;
   $('settings-drawer').style.display = 'none';
   updateKeyStatus();
+  showCameraScreen();
 });
 
-function openSettings() {
-  $('settings-overlay').classList.add('open');
-  $('settings-drawer').style.display = 'block';
-}
-function closeSettings() {
-  $('settings-overlay').classList.remove('open');
-  $('settings-drawer').style.display = 'none';
-  $('api-key-input-wrap').style.display = 'none';
-}
-function toggleKeyInput() {
-  const wrap = $('api-key-input-wrap');
-  wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
-  if (wrap.style.display === 'block') $('api-key').focus();
-}
-function saveKey() {
-  const k = $('api-key').value.trim();
-  if (k) localStorage.setItem('fc_key', k);
-  updateKeyStatus();
-  $('api-key-input-wrap').style.display = 'none';
-}
-function updateKeyStatus() {
-  const k = localStorage.getItem('fc_key');
-  const dot = $('key-dot');
-  const lbl = $('key-label');
-  if (k) {
-    dot.className = 'dot ok';
-    lbl.textContent = 'Klíč nastaven (' + k.slice(0,10) + '…)';
-  } else {
-    dot.className = 'dot';
-    lbl.textContent = 'Klikni pro zadání klíče';
-  }
-}
-
+/* ══ API KEY ══ */
 function getKey() {
   const k = localStorage.getItem('fc_key') || $('api-key').value.trim();
-  if (!k) {
-    openSettings();
-    toggleKeyInput();
-    return null;
-  }
+  if (!k) { openSettings(); toggleKeyInput(); return null; }
   return k;
 }
-
-function showStatus(id, html) { $(id).innerHTML = html; }
-function showErr(msg, id) { $(id || 'err').textContent = msg; }
-function clearMsg(id1, id2) {
-  if($(id1)) $(id1).innerHTML = '';
-  if(id2 && $(id2)) $(id2).textContent = '';
+function openSettings() { $('settings-overlay').classList.add('open'); $('settings-drawer').style.display = 'block'; }
+function closeSettings() { $('settings-overlay').classList.remove('open'); $('settings-drawer').style.display = 'none'; $('api-key-input-wrap').style.display = 'none'; }
+function toggleKeyInput() { const w = $('api-key-input-wrap'); w.style.display = w.style.display === 'block' ? 'none' : 'block'; if (w.style.display === 'block') $('api-key').focus(); }
+function saveKey() { const k = $('api-key').value.trim(); if (k) localStorage.setItem('fc_key', k); updateKeyStatus(); $('api-key-input-wrap').style.display = 'none'; }
+function updateKeyStatus() {
+  const k = localStorage.getItem('fc_key');
+  $('key-dot').className = k ? 'dot ok' : 'dot';
+  $('key-label').textContent = k ? 'Klíč nastaven (' + k.slice(0,10) + '…)' : 'Klikni pro zadání klíče';
 }
 
-function showScreen(name) {
+/* ══ TABS ══ */
+function switchTab(tab) {
+  currentTab = tab;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  $('screen-' + name).classList.add('active');
-  window.scrollTo(0, 0);
-  $('back-btn').style.display = name !== 'camera' ? 'block' : 'none';
-  $('header-sub').textContent = name === 'camera' ? ''
-    : name === 'prefs'   ? 'Tak co ti dnes chutná? 🤔'
-    : name === 'recipes' ? 'Tady máš, vyber si! 🍽'
-    : 'Jdeme na to! 👨‍🍳';
+  $('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  $('nav-' + tab).classList.add('active');
+  $('back-btn').style.display = 'none';
+  $('header-sub').textContent = tab === 'cook' ? '' : tab === 'favorites' ? 'Uložené recepty' : tab === 'history' ? 'Co jsem vařil/a' : 'Plán na týden';
+  if (tab === 'favorites') renderFavorites();
+  if (tab === 'history') renderHistory();
 }
 
-function setBtns(mode) {
-  $('btns-start').style.display = mode === 'start' ? 'flex' : 'none';
-  $('btns-live').style.display  = mode === 'live'  ? 'flex' : 'none';
-  $('btns-taken').style.display = mode === 'taken' ? 'flex' : 'none';
+/* ══ COOK SCREENS ══ */
+function showCameraScreen() {
+  ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
+  $('screen-camera').style.display = 'block';
+  $('back-btn').style.display = 'none';
+  $('header-sub').textContent = '';
+  clearMsg();
+}
+function showPrefsScreen() {
+  ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
+  $('screen-prefs').style.display = 'block';
+  $('back-btn').style.display = 'block';
+  $('header-sub').textContent = 'Tak co ti dnes chutná? 🤔';
+  window.scrollTo(0,0);
+}
+function showRecipesScreen() {
+  ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
+  $('screen-recipes').style.display = 'block';
+  $('back-btn').style.display = 'block';
+  $('header-sub').textContent = 'Tady máš, vyber si! 🍽';
+  window.scrollTo(0,0);
+}
+function showDetailScreen() {
+  ['screen-camera','screen-prefs','screen-recipes','screen-detail'].forEach(id => $(id).style.display = 'none');
+  $('screen-detail').style.display = 'block';
+  $('back-btn').style.display = 'block';
+  $('header-sub').textContent = 'Jdeme na to! 👨‍🍳';
+  window.scrollTo(0,0);
 }
 
+function goBack() {
+  if ($('screen-detail').style.display === 'block') { showRecipesScreen(); return; }
+  if ($('screen-recipes').style.display === 'block') { showPrefsScreen(); return; }
+  if ($('screen-prefs').style.display === 'block') { showCameraScreen(); return; }
+  showCameraScreen();
+}
+
+/* ══ MODE ══ */
+function setMode(mode) {
+  currentMode = mode;
+  $('mode-fridge').classList.toggle('active', mode === 'fridge');
+  $('mode-leftovers').classList.toggle('active', mode === 'leftovers');
+  $('camera-box').style.display = mode === 'fridge' ? 'flex' : 'none';
+  $('leftovers-input').style.display = mode === 'leftovers' ? 'block' : 'none';
+  $('btns-start').style.display = mode === 'fridge' ? 'flex' : 'none';
+  $('btns-leftovers').style.display = mode === 'leftovers' ? 'flex' : 'none';
+  $('btns-live').style.display = 'none';
+  $('btns-taken').style.display = 'none';
+  $('placeholder-title').textContent = mode === 'fridge' ? 'Seš zoufalá nebo\nje jen hledáš inspiraci? 🙂' : 'Co ti zbylo z včerejška?';
+  $('placeholder-hint').textContent = mode === 'fridge' ? 'Vyfoť lednici a za chvíli\nmáš 3 recepty přímo na míru' : 'Napiš co máš po ruce\na AI z toho vytvoří recept';
+  clearMsg();
+}
+
+/* ══ CAMERA ══ */
 function startCamera() {
-  clearMsg('status', 'err');
+  clearMsg();
   navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
     .then(s => {
       stream = s;
-      const v = $('video');
-      v.srcObject = s;
-      v.style.display = 'block';
+      $('video').srcObject = s;
+      $('video').style.display = 'block';
       $('placeholder').style.display = 'none';
       $('preview').style.display = 'none';
       setBtns('live');
-      showStatus('status', 'Namiř na lednici...');
+      setStatus('Namiř na lednici...');
     })
-    .catch(e => showErr('Kamera není dostupná (' + (e.name||e) + '). Použij "Ze souboru".', 'err'));
+    .catch(e => setErr('Kamera není dostupná (' + (e.name||e) + '). Použij "Ze souboru".'));
 }
-
-function stopCamera() {
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-}
-
+function stopCamera() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
 function capture() {
   const v = $('video'), c = $('canvas');
-  c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
-  c.getContext('2d').drawImage(v, 0, 0);
-  imageB64 = c.toDataURL('image/jpeg', 0.85).split(',')[1];
+  c.width = v.videoWidth||640; c.height = v.videoHeight||480;
+  c.getContext('2d').drawImage(v,0,0);
+  imageB64 = c.toDataURL('image/jpeg',0.85).split(',')[1];
   $('preview').src = 'data:image/jpeg;base64,' + imageB64;
   $('preview').style.display = 'block';
-  v.style.display = 'none';
-  stopCamera();
-  setBtns('taken');
-  showStatus('status', 'Foto pořízeno — klikni na Analyzovat');
+  $('video').style.display = 'none';
+  stopCamera(); setBtns('taken');
+  setStatus('Foto pořízeno — klikni na Analyzovat');
 }
-
 function loadFile(e) {
   const file = e.target.files[0]; if (!file) return;
-  clearMsg('status', 'err');
-  const reader = new FileReader();
-  reader.onload = ev => {
+  clearMsg();
+  const r = new FileReader();
+  r.onload = ev => {
     imageB64 = ev.target.result.split(',')[1];
     $('preview').src = ev.target.result;
     $('preview').style.display = 'block';
     $('placeholder').style.display = 'none';
     $('video').style.display = 'none';
     stopCamera(); setBtns('taken');
-    showStatus('status', 'Foto nahráno — klikni na Analyzovat');
+    setStatus('Foto nahráno — klikni na Analyzovat');
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(file);
   e.target.value = '';
 }
-
 function retake() {
-  stopCamera(); imageB64 = null; usedRecipes = [];
+  stopCamera(); imageB64 = null;
   $('preview').style.display = 'none';
   $('video').style.display = 'none';
   $('placeholder').style.display = 'block';
-  setBtns('start'); clearMsg('status', 'err');
-  showScreen('camera');
+  setBtns('start'); clearMsg();
+}
+function setBtns(mode) {
+  $('btns-start').style.display = mode==='start'&&currentMode==='fridge' ? 'flex' : 'none';
+  $('btns-live').style.display = mode==='live' ? 'flex' : 'none';
+  $('btns-taken').style.display = mode==='taken' ? 'flex' : 'none';
+  $('btns-leftovers').style.display = mode==='start'&&currentMode==='leftovers' ? 'flex' : 'none';
 }
 
-function goBack() {
-  const active = document.querySelector('.screen.active');
-  if (active && active.id === 'screen-detail') { showScreen('recipes'); return; }
-  if (active && active.id === 'screen-recipes') { showScreen('prefs'); return; }
-  retake();
-}
-
-/* ── STEP 1: detect ingredients ── */
+/* ══ ANALYZE ══ */
 async function analyze() {
   const key = getKey(); if (!key) return;
-  if (!imageB64) { showErr('Nejdřív pořiď nebo nahraj fotku.', 'err'); return; }
-  clearMsg('status', 'err');
-  usedRecipes = [];
-  $('analyze-btn').disabled = true;
-  showStatus('status', '<span class="spinner"></span> Analyzuji obsah lednice...');
-
+  if (!imageB64) { setErr('Nejdřív pořiď nebo nahraj fotku.'); return; }
+  clearMsg(); $('analyze-btn').disabled = true;
+  setStatus('<span class="spinner"></span> Analyzuji obsah lednice...');
   try {
     const res = await callAPI(key, [
       { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageB64 } },
-      { type: 'text', text: `Podívej se na tuto fotku lednice a vypiš všechny ingredience které vidíš.
-Odpověz POUZE jako JSON bez markdown:
-{"ingredients":["ingredience1","ingredience2","..."]}` }
+      { type: 'text', text: `Podívej se na tuto fotku lednice a vypiš všechny ingredience které vidíš.\nOdpověz POUZE jako JSON bez markdown:\n{"ingredients":["ingredience1","ingredience2","..."]}` }
     ]);
-
     const data = parseJSON(res);
-    const ings = data.ingredients || [];
-
-    renderIngredients(ings);
-    // show prefs screen, not recipes yet
+    currentIngredients = data.ingredients || [];
+    renderIngredients(currentIngredients);
     $('ing-grid-prefs').innerHTML = $('ing-grid').innerHTML;
-    showScreen('prefs');
-
+    showPrefsScreen();
   } catch(e) {
-    showStatus('status', '');
-    showErr('Chyba: ' + (e.message || String(e)), 'err');
+    setStatus(''); setErr('Chyba: ' + (e.message||String(e)));
   } finally {
     $('analyze-btn').disabled = false;
   }
 }
 
-/* ── STEP 2: get 3 recipes ── */
-async function fetchRecipes(key, ingredients, exclude, prefs) {
-  showStatus('status2', '<span class="spinner"></span> Hledám recepty...');
-  $('other-btn').disabled = true;
-
-  const excludeNote = exclude.length
-    ? `\nTyto recepty NESMÍŠ navrhnout (již byly zobrazeny): ${exclude.join(', ')}` : '';
-
-  const moodNote = prefs && prefs.mood
-    ? `\nNálada / styl jídla: "${prefs.mood}" — přizpůsob tomu výběr jídel.` : '';
-
-  const cuisineNote = prefs && prefs.cuisine && prefs.cuisine.length
-    ? `\nPreferovaná kuchyně: ${prefs.cuisine.join(', ')} — navrhuj recepty z těchto kuchyní. Pokud to ingredience nedovolují, zvol nejbližší alternativu.` : '';
-
-  try {
-    const res = await callAPI(key, [
-      { type: 'text', text: `Jsi zkušený kuchař. Ze těchto ingrediencí: ${ingredients.join(', ')}
-Navrhni přesně 3 různá konkrétní tradiční nebo populární jídla.${excludeNote}${moodNote}${cuisineNote}
-
-Každé jídlo musí být skutečně existující z tradiční kuchyně.
-U ingrediencí VŽDY uveď přesnou gramáž nebo množství (např. "200 g kuřecích prsou", "2 vejce", "100 ml smetany").
-U každého kroku piš PODROBNÝ postup — jako bys vysvětloval někomu kdo vaří poprvé. Uveď teplotu, čas, konzistenci, barvu nebo vůni jako signál kdy je krok hotový (např. "Rozpalte pánev na střední teplotu, přidejte máslo a počkejte až začne pěnit — asi 1 minutu. Přidejte vejce a míchejte gumovou stěrkou dokud nejsou zpola tuhá, přibližně 2–3 minuty.").
-Každý recept musí mít 6–8 kroků.
-Uveď celkový čas přípravy a čas vaření.
-
-Odpověz POUZE jako JSON bez markdown:
-{"recipes":[
-  {"emoji":"🍝","name":"Název jídla","origin":"Italská kuchyně","description":"Krátký popis 1 věta.","prep_time":"10 min","cook_time":"20 min","servings":"2 porce","needed":["200 g surovina1","2 ks surovina2"],"extra":["100 g co dokoupit"],"steps":["Krok 1 — vařte 5 minut","Krok 2","Krok 3","Krok 4","Krok 5"]},
-  {"emoji":"🥘","name":"Název jídla 2","origin":"Česká kuchyně","description":"Krátký popis.","prep_time":"15 min","cook_time":"30 min","servings":"2 porce","needed":["150 g surovina"],"extra":[],"steps":["Krok 1","Krok 2","Krok 3"]},
-  {"emoji":"🍲","name":"Název jídla 3","origin":"Asijská kuchyně","description":"Krátký popis.","prep_time":"10 min","cook_time":"15 min","servings":"2 porce","needed":["300 g surovina"],"extra":[],"steps":["Krok 1","Krok 2","Krok 3"]}
-]}` }
-    ]);
-
-    const data = parseJSON(res);
-    const recipes = data.recipes || [];
-
-    recipes.forEach(r => { if (!usedRecipes.includes(r.name)) usedRecipes.push(r.name); });
-    renderRecipeCards(recipes, ingredients);
-    showStatus('status2', '');
-    showScreen('recipes');
-
-  } catch(e) {
-    showStatus('status2', '');
-    showErr('Chyba při hledání receptů: ' + (e.message || String(e)), 'err2');
-  } finally {
-    $('other-btn').disabled = false;
-  }
-}
-
-async function otherRecipes() {
+async function analyzeLeftovers() {
   const key = getKey(); if (!key) return;
-  const ings = Array.from($('ing-grid').querySelectorAll('.ing-pill')).map(p => p.textContent);
-  const prefs = getSelectedPrefs();
-  await fetchRecipes(key, ings, [...usedRecipes], prefs);
+  const text = $('leftovers-text').value.trim();
+  if (!text) { setErr('Napiš co ti zbylo.'); return; }
+  clearMsg();
+  currentIngredients = text.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
+  renderIngredients(currentIngredients);
+  $('ing-grid-prefs').innerHTML = $('ing-grid').innerHTML;
+  showPrefsScreen();
 }
 
+/* ══ PREFERENCES ══ */
 function toggleTag(el, group) {
-  if (group === 'mood') {
-    // only one mood at a time
-    $('mood-tags').querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
+  if (group === 'mood' || group === 'diff') {
+    el.closest('.tag-grid').querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
   }
   el.classList.toggle('selected');
 }
-
 function getSelectedPrefs() {
-  const mood = Array.from($('mood-tags').querySelectorAll('.tag.selected')).map(t => t.textContent.replace(/^.+?\s/,'').trim());
-  const cuisine = Array.from($('cuisine-tags').querySelectorAll('.tag.selected')).map(t => t.textContent.replace(/^.+?\s/,'').trim());
-  return { mood: mood[0] || null, cuisine: cuisine.length ? cuisine : null };
+  const mood = [...$('mood-tags').querySelectorAll('.tag.selected')].map(t => t.textContent.replace(/^.\s/,'').trim());
+  const cuisine = [...$('cuisine-tags').querySelectorAll('.tag.selected')].map(t => t.textContent.replace(/^.\s/,'').trim());
+  const diff = [...$('diff-tags').querySelectorAll('.tag.selected')].map(t => t.textContent.replace(/^.\s/,'').trim());
+  const servings = parseInt($('servings-slider').value);
+  return { mood: mood[0]||null, cuisine: cuisine.length?cuisine:null, difficulty: diff[0]||null, servings };
 }
 
 async function confirmPrefs() {
   const key = getKey(); if (!key) return;
-  const ings = Array.from($('ing-grid-prefs').querySelectorAll('.ing-pill')).map(p => p.textContent);
   const prefs = getSelectedPrefs();
-  usedRecipes = [];
-  await fetchRecipes(key, ings, [], prefs);
+  currentServings = prefs.servings;
+  baseServings = prefs.servings;
+  allRecipes = [];
+  recipePageIndex = 0;
+  await fetchAllRecipes(key, currentIngredients, prefs);
 }
 
-/* ── Render ── */
-function renderIngredients(ings) {
-  $('ing-grid').innerHTML = ings.map(i => `<span class="ing-pill">${esc(i)}</span>`).join('');
+/* ══ FETCH 9 RECIPES ══ */
+async function fetchAllRecipes(key, ingredients, prefs) {
+  setStatus2('<span class="spinner"></span> Hledám recepty...');
+  $('other-btn') && ($('other-btn').disabled = true);
+
+  const likes = getLikes();
+  const dislikes = getDislikes();
+  const moodNote = prefs?.mood ? `\nNálada: "${prefs.mood}"` : '';
+  const cuisineNote = prefs?.cuisine?.length ? `\nKuchyně: ${prefs.cuisine.join(', ')}` : '';
+  const diffNote = prefs?.difficulty ? `\nObtížnost: "${prefs.difficulty}"` : '';
+  const likesNote = likes.length ? `\nUživatel MÁ RÁD tyto styly jídel: ${likes.join(', ')} — navrhuj podobné.` : '';
+  const dislikesNote = dislikes.length ? `\nUživatel NEMÁ RÁD: ${dislikes.join(', ')} — vyhni se podobným.` : '';
+  const servingsNote = `\nRecept navrhni pro ${prefs?.servings||2} ${prefs?.servings===1?'osobu':prefs?.servings<=4?'osoby':'osob'}.`;
+
+  try {
+    const res = await callAPI(key, [
+      { type: 'text', text: `Jsi zkušený kuchař. Ze ingrediencí: ${ingredients.join(', ')}
+Navrhni přesně 9 různých konkrétních tradičních nebo populárních jídel.${moodNote}${cuisineNote}${diffNote}${likesNote}${dislikesNote}${servingsNote}
+
+Každé jídlo musí být skutečně existující.
+U ingrediencí VŽDY uveď přesnou gramáž pro zadaný počet porcí.
+U každého kroku piš PODROBNÝ postup — teplota, čas, konzistence, barva jako signál hotovosti.
+Každý recept 6–8 kroků.
+
+Odpověz POUZE jako JSON bez markdown:
+{"recipes":[
+  {"emoji":"🍝","name":"Název","origin":"Italská kuchyně","description":"1 věta.","difficulty":"easy","prep_time":"10 min","cook_time":"20 min","servings":${prefs?.servings||2},"needed":["200 g surovina"],"extra":["co dokoupit"],"steps":["Podrobný krok 1...","Krok 2..."],"nutrition":{"calories":450,"protein":22,"carbs":55,"fat":18}},
+  ... dalších 8 receptů stejná struktura
+]}` }
+    ]);
+    const data = parseJSON(res);
+    allRecipes = data.recipes || [];
+    recipePageIndex = 0;
+    renderCurrentPage();
+    showRecipesScreen();
+    setStatus2('');
+  } catch(e) {
+    setStatus2(''); setErr2('Chyba: ' + (e.message||String(e)));
+  } finally {
+    $('other-btn') && ($('other-btn').disabled = false);
+  }
 }
 
-function renderRecipeCards(recipes, ings) {
-  $('recipe-cards').innerHTML = recipes.map((r, i) => `
-    <button class="recipe-card-btn" onclick="showDetail(${i})">
-      <span class="emoji">${r.emoji || '🍽️'}</span>
+function showNextRecipes() {
+  recipePageIndex += 3;
+  if (recipePageIndex >= allRecipes.length) recipePageIndex = 0;
+  renderCurrentPage();
+  window.scrollTo(0,0);
+}
+
+function renderCurrentPage() {
+  const page = allRecipes.slice(recipePageIndex, recipePageIndex + 3);
+  $('recipe-cards').innerHTML = page.map((r, i) => {
+    const idx = recipePageIndex + i;
+    const isFav = isFavorite(r.name);
+    const diffClass = r.difficulty === 'easy' ? 'easy' : r.difficulty === 'hard' ? 'hard' : 'medium';
+    const diffLabel = r.difficulty === 'easy' ? '😊 Snadné' : r.difficulty === 'hard' ? '🎓 Pokročilé' : '👨‍🍳 Střední';
+    return `<button class="rcard" onclick="showDetail(${idx})">
+      <span class="emo">${r.emoji||'🍽️'}</span>
       <div class="info">
         <div class="rname">${esc(r.name)}</div>
         <div class="rorigin">${esc(r.origin)}</div>
         <div class="rdesc">${esc(r.description)}</div>
-        ${(r.prep_time || r.cook_time) ? `<div class="rtime">${[r.prep_time ? '⏱ '+r.prep_time : '', r.cook_time ? '🔥 '+r.cook_time : ''].filter(Boolean).join(' · ')}</div>` : ''}
+        <div class="rmeta">
+          <span class="rmeta-pill ${diffClass}">${diffLabel}</span>
+          ${r.prep_time?`<span class="rmeta-pill">⏱ ${esc(r.prep_time)}</span>`:''}
+          ${r.cook_time?`<span class="rmeta-pill">🔥 ${esc(r.cook_time)}</span>`:''}
+        </div>
       </div>
-      <span class="arrow">›</span>
-    </button>`).join('');
-
-  window._currentRecipes = recipes;
+      <div class="ricons">
+        <button class="star-btn" onclick="event.stopPropagation();toggleFavFromCard(${idx},this)">${isFav?'⭐':'☆'}</button>
+        <span class="arr">›</span>
+      </div>
+    </button>`;
+  }).join('');
+  const remaining = allRecipes.length - recipePageIndex - 3;
+  $('other-btn').textContent = remaining > 0 ? `Jiné recepty (${Math.min(remaining,3)})` : 'Jiné recepty';
 }
 
+/* ══ DETAIL ══ */
 function showDetail(idx) {
-  const r = window._currentRecipes[idx]; if (!r) return;
-  $('d-emoji').textContent = r.emoji || '🍽️';
-  $('d-name').textContent = r.name || '';
-  $('d-origin').textContent = r.origin || '';
-  $('d-desc').textContent = r.description || '';
+  const r = allRecipes[idx]; if (!r) return;
+  currentRecipe = { ...r, idx };
+  currentServings = r.servings || baseServings;
+  baseServings = currentServings;
+
+  $('d-emoji').textContent = r.emoji||'🍽️';
+  $('d-name').textContent = r.name||'';
+  $('d-origin').textContent = r.origin||'';
+  $('d-desc').textContent = r.description||'';
 
   const meta = [];
-  if (r.prep_time) meta.push(`⏱ Příprava: ${r.prep_time}`);
-  if (r.cook_time) meta.push(`🔥 Vaření: ${r.cook_time}`);
-  if (r.servings)  meta.push(`🍽 ${r.servings}`);
-  $('d-meta').innerHTML = meta.map(m => `<span class="meta-pill">${esc(m)}</span>`).join('');
+  if (r.prep_time) meta.push(`⏱ ${r.prep_time}`);
+  if (r.cook_time) meta.push(`🔥 ${r.cook_time}`);
+  if (r.servings) meta.push(`🍽 ${r.servings} ${r.servings===1?'porce':r.servings<=4?'porce':'porcí'}`);
+  const diffLabel = r.difficulty==='easy'?'😊 Snadné':r.difficulty==='hard'?'🎓 Pokročilé':'👨‍🍳 Střední';
+  meta.push(diffLabel);
+  $('d-meta').innerHTML = meta.map(m=>`<span class="meta-pill">${esc(m)}</span>`).join('');
 
-  $('d-needed').innerHTML = (r.needed||[]).map(i=>`<li>${esc(i)}</li>`).join('');
-  if (r.extra && r.extra.length) {
-    $('d-extra').innerHTML = r.extra.map(i=>`<li>${esc(i)}</li>`).join('');
+  $('detail-servings').value = currentServings;
+  $('detail-servings-val').textContent = currentServings;
+  renderIngredientsList(r.needed||[], currentServings, baseServings, 'd-needed', false);
+
+  if (r.extra?.length) {
+    renderIngredientsList(r.extra||[], currentServings, baseServings, 'd-extra', true);
     $('d-extra-wrap').style.display = 'block';
   } else {
     $('d-extra-wrap').style.display = 'none';
   }
+
+  if (r.nutrition) {
+    const n = r.nutrition;
+    $('d-nutrition').innerHTML = `
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.calories*currentServings/baseServings)}</div><div class="nutr-lbl">kcal</div></div>
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.protein*currentServings/baseServings)}g</div><div class="nutr-lbl">Bílkoviny</div></div>
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.carbs*currentServings/baseServings)}g</div><div class="nutr-lbl">Sacharidy</div></div>
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.fat*currentServings/baseServings)}g</div><div class="nutr-lbl">Tuky</div></div>`;
+  } else {
+    $('d-nutrition').innerHTML = '<div style="font-size:13px;color:var(--text3)">Nutriční hodnoty nejsou k dispozici</div>';
+  }
+
   $('d-steps').innerHTML = (r.steps||[]).map(s=>`<li>${esc(s)}</li>`).join('');
-  showScreen('detail');
+
+  const voteData = getVotes();
+  $('vote-up').className = 'vote-btn' + (voteData[r.name]==='up'?' liked':'');
+  $('vote-down').className = 'vote-btn' + (voteData[r.name]==='down'?' disliked':'');
+
+  $('fav-btn').textContent = isFavorite(r.name) ? '⭐ Oblíbené' : '☆ Oblíbit';
+
+  addToHistory(r);
+  showDetailScreen();
 }
 
-/* ── Utils ── */
+function updateServings(val) {
+  val = parseInt(val);
+  $('detail-servings-val').textContent = val;
+  if (!currentRecipe) return;
+  renderIngredientsList(currentRecipe.needed||[], val, baseServings, 'd-needed', false);
+  if (currentRecipe.extra?.length) renderIngredientsList(currentRecipe.extra||[], val, baseServings, 'd-extra', true);
+  if (currentRecipe.nutrition) {
+    const n = currentRecipe.nutrition;
+    $('d-nutrition').innerHTML = `
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.calories*val/baseServings)}</div><div class="nutr-lbl">kcal</div></div>
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.protein*val/baseServings)}g</div><div class="nutr-lbl">Bílkoviny</div></div>
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.carbs*val/baseServings)}g</div><div class="nutr-lbl">Sacharidy</div></div>
+      <div class="nutr-card"><div class="nutr-val">${Math.round(n.fat*val/baseServings)}g</div><div class="nutr-lbl">Tuky</div></div>`;
+  }
+  currentServings = val;
+}
+
+function renderIngredientsList(items, servings, base, targetId, dim) {
+  $(targetId).innerHTML = items.map(item => {
+    const scaled = scaleIngredient(item, servings, base);
+    return `<li>${esc(scaled)}</li>`;
+  }).join('');
+  $(targetId).className = 'ilist' + (dim?' dim':'');
+}
+
+function scaleIngredient(text, servings, base) {
+  if (base === servings) return text;
+  const ratio = servings / base;
+  return text.replace(/(\d+(?:[.,]\d+)?)/g, (match, num) => {
+    const scaled = parseFloat(num.replace(',','.')) * ratio;
+    return scaled % 1 === 0 ? scaled.toString() : scaled.toFixed(1).replace('.0','');
+  });
+}
+
+/* ══ VOTE ══ */
+function vote(dir) {
+  if (!currentRecipe) return;
+  const votes = getVotes();
+  if (votes[currentRecipe.name] === dir) {
+    delete votes[currentRecipe.name];
+  } else {
+    votes[currentRecipe.name] = dir;
+  }
+  localStorage.setItem('fc_votes', JSON.stringify(votes));
+  $('vote-up').className = 'vote-btn' + (votes[currentRecipe.name]==='up'?' liked':'');
+  $('vote-down').className = 'vote-btn' + (votes[currentRecipe.name]==='down'?' disliked':'');
+}
+function getVotes() { try { return JSON.parse(localStorage.getItem('fc_votes')||'{}'); } catch(_) { return {}; } }
+function getLikes() { const v = getVotes(); return Object.entries(v).filter(([,d])=>d==='up').map(([n])=>n); }
+function getDislikes() { const v = getVotes(); return Object.entries(v).filter(([,d])=>d==='down').map(([n])=>n); }
+
+/* ══ FAVORITES ══ */
+function getFavorites() { try { return JSON.parse(localStorage.getItem('fc_favs')||'[]'); } catch(_) { return []; } }
+function saveFavorites(favs) { localStorage.setItem('fc_favs', JSON.stringify(favs)); }
+function isFavorite(name) { return getFavorites().some(f => f.name === name); }
+function toggleFavorite() {
+  if (!currentRecipe) return;
+  let favs = getFavorites();
+  if (isFavorite(currentRecipe.name)) {
+    favs = favs.filter(f => f.name !== currentRecipe.name);
+    $('fav-btn').textContent = '☆ Oblíbit';
+  } else {
+    favs.unshift({ ...currentRecipe, savedAt: new Date().toLocaleDateString('cs-CZ') });
+    if (favs.length > 30) favs = favs.slice(0,30);
+    $('fav-btn').textContent = '⭐ Oblíbené';
+  }
+  saveFavorites(favs);
+  renderCurrentPage();
+}
+function toggleFavFromCard(idx, btn) {
+  const r = allRecipes[idx]; if (!r) return;
+  let favs = getFavorites();
+  if (isFavorite(r.name)) {
+    favs = favs.filter(f => f.name !== r.name);
+    btn.textContent = '☆';
+  } else {
+    favs.unshift({ ...r, savedAt: new Date().toLocaleDateString('cs-CZ') });
+    if (favs.length > 30) favs = favs.slice(0,30);
+    btn.textContent = '⭐';
+  }
+  saveFavorites(favs);
+}
+function renderFavorites() {
+  const favs = getFavorites();
+  if (!favs.length) {
+    $('favorites-list').innerHTML = `<div class="empty-state"><div class="eico">⭐</div><p>Zatím žádné oblíbené recepty.<br>Klikni na ☆ u receptu a uloží se sem.</p></div>`;
+    return;
+  }
+  $('favorites-list').innerHTML = favs.map((r,i) => `
+    <div class="saved-card" onclick="openSavedRecipe('favs',${i})">
+      <span class="emo">${r.emoji||'🍽️'}</span>
+      <div class="info">
+        <div class="sname">${esc(r.name)}</div>
+        <div class="smeta">${esc(r.origin||'')} · Uloženo ${esc(r.savedAt||'')}</div>
+      </div>
+      <button class="del-btn" onclick="event.stopPropagation();deleteFavorite(${i})">✕</button>
+    </div>`).join('');
+}
+function deleteFavorite(i) {
+  const favs = getFavorites(); favs.splice(i,1); saveFavorites(favs); renderFavorites();
+}
+
+/* ══ HISTORY ══ */
+function getHistory() { try { return JSON.parse(localStorage.getItem('fc_history')||'[]'); } catch(_) { return []; } }
+function addToHistory(r) {
+  let hist = getHistory();
+  hist = hist.filter(h => h.name !== r.name);
+  hist.unshift({ ...r, cookedAt: new Date().toLocaleDateString('cs-CZ') });
+  if (hist.length > 10) hist = hist.slice(0,10);
+  localStorage.setItem('fc_history', JSON.stringify(hist));
+}
+function renderHistory() {
+  const hist = getHistory();
+  if (!hist.length) {
+    $('history-list').innerHTML = `<div class="empty-state"><div class="eico">🕐</div><p>Zatím žádná historie.<br>Recepty které si prohlédneš se uloží sem.</p></div>`;
+    return;
+  }
+  $('history-list').innerHTML = hist.map((r,i) => `
+    <div class="saved-card" onclick="openSavedRecipe('hist',${i})">
+      <span class="emo">${r.emoji||'🍽️'}</span>
+      <div class="info">
+        <div class="sname">${esc(r.name)}</div>
+        <div class="smeta">${esc(r.origin||'')} · ${esc(r.cookedAt||'')}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openSavedRecipe(source, i) {
+  const list = source === 'favs' ? getFavorites() : getHistory();
+  const r = list[i]; if (!r) return;
+  allRecipes = [r];
+  recipePageIndex = 0;
+  currentRecipe = { ...r, idx: 0 };
+  switchTab('cook');
+  showDetail(0);
+}
+
+/* ══ WEEK PLAN ══ */
+function startWeekPlan() {
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
+    .then(s => {
+      stream = s;
+      $('plan-empty').querySelector('.camera-box').innerHTML = `<video id="plan-video" autoplay playsinline muted style="width:100%;display:block"></video>`;
+      $('plan-video').srcObject = s;
+      $('plan-empty').querySelector('.btn-row').innerHTML = `
+        <button class="btn" onclick="cancelWeekCamera()">Zrušit</button>
+        <button class="btn btn-gold" onclick="captureWeek()">Vyfotit</button>`;
+    })
+    .catch(() => setErrPlan('Kamera není dostupná. Použij "Ze souboru".'));
+}
+function cancelWeekCamera() {
+  stopCamera();
+  $('plan-empty').querySelector('.camera-box').innerHTML = `<div class="placeholder"><div class="ico">📅</div><div class="ptitle">Naplánuj si týden</div><div class="phint">Vyfoť lednici a AI navrhne<br>jídla na celý týden</div></div>`;
+  $('plan-empty').querySelector('.btn-row').innerHTML = `<button class="btn btn-gold" onclick="startWeekPlan()">Vyfotit lednici</button><label class="btn">Ze souboru<input type="file" accept="image/*" style="display:none" onchange="loadWeekFile(event)"></label>`;
+}
+function captureWeek() {
+  const v = $('plan-video'), c = $('canvas');
+  c.width = v.videoWidth||640; c.height = v.videoHeight||480;
+  c.getContext('2d').drawImage(v,0,0);
+  weekImageB64 = c.toDataURL('image/jpeg',0.85).split(',')[1];
+  stopCamera();
+  fetchWeekPlan();
+}
+function loadWeekFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => { weekImageB64 = ev.target.result.split(',')[1]; fetchWeekPlan(); };
+  r.readAsDataURL(file);
+  e.target.value = '';
+}
+async function fetchWeekPlan() {
+  const key = getKey(); if (!key) return;
+  setStatusPlan('<span class="spinner"></span> Připravuji týdenní plán...');
+  try {
+    const content = weekImageB64
+      ? [{ type:'image', source:{type:'base64', media_type:'image/jpeg', data:weekImageB64}}, {type:'text',text:`Podívej se na obsah lednice a navrhni jídla na 7 dní (Pondělí–Neděle). Každý den jedno hlavní jídlo. Odpověz POUZE jako JSON bez markdown:\n{"days":[{"day":"Po","emoji":"🍝","meal":"Název jídla"},{"day":"Út","emoji":"🥘","meal":"Název"},{"day":"St","emoji":"🍲","meal":"Název"},{"day":"Čt","emoji":"🍳","meal":"Název"},{"day":"Pá","emoji":"🥗","meal":"Název"},{"day":"So","emoji":"🍖","meal":"Název"},{"day":"Ne","emoji":"🍰","meal":"Název"}]}`}]
+      : [{type:'text',text:`Navrhni vyvážený jídelní plán na 7 dní. Odpověz POUZE jako JSON bez markdown:\n{"days":[{"day":"Po","emoji":"🍝","meal":"Název jídla"},...]}`}];
+    const res = await callAPI(key, content);
+    const data = parseJSON(res);
+    renderWeekPlan(data.days||[]);
+    $('plan-empty').style.display = 'none';
+    $('plan-result').style.display = 'block';
+    setStatusPlan('');
+  } catch(e) {
+    setStatusPlan(''); setErrPlan('Chyba: ' + (e.message||String(e)));
+  }
+}
+function renderWeekPlan(days) {
+  $('week-grid').innerHTML = days.map(d => `
+    <div class="week-day">
+      <span class="day-name">${esc(d.day)}</span>
+      <span class="day-meal">${esc(d.meal)}</span>
+      <span class="day-emo">${d.emoji||'🍽️'}</span>
+    </div>`).join('');
+}
+function resetPlan() {
+  weekImageB64 = null;
+  $('plan-empty').style.display = 'block';
+  $('plan-result').style.display = 'none';
+  cancelWeekCamera();
+}
+
+/* ══ RENDER HELPERS ══ */
+function renderIngredients(ings) {
+  $('ing-grid').innerHTML = ings.map(i=>`<span class="ing-pill">${esc(i)}</span>`).join('');
+}
+
+/* ══ STATUS HELPERS ══ */
+function setStatus(html) { $('status').innerHTML = html; }
+function setErr(msg) { $('err').textContent = msg; }
+function setStatus2(html) { $('status2').innerHTML = html; }
+function setErr2(msg) { $('err2').textContent = msg; }
+function setStatusPlan(html) { $('status-plan').innerHTML = html; }
+function setErrPlan(msg) { $('err-plan').textContent = msg; }
+function clearMsg() { setStatus(''); setErr(''); }
+
+/* ══ API ══ */
 async function callAPI(key, content) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -749,30 +1116,23 @@ async function callAPI(key, content) {
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2500,
-      messages: [{ role: 'user', content }]
-    })
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:3000, messages:[{role:'user',content}] })
   });
   if (!res.ok) {
     let msg = 'HTTP ' + res.status;
-    try { const j = await res.json(); msg = j.error?.message || msg; } catch(_) {}
+    try { const j = await res.json(); msg = j.error?.message||msg; } catch(_) {}
     throw new Error(msg);
   }
   const data = await res.json();
-  return (data.content || []).map(b => b.type === 'text' ? b.text : '').join('').trim();
+  return (data.content||[]).map(b=>b.type==='text'?b.text:'').join('').trim();
 }
 
 function parseJSON(raw) {
-  const clean = raw
-    .replace(/^```[a-z]*\n?/i, '').replace(/```$/, '').trim()
-    .replace(/,\s*([\]}])/g, '$1'); // remove trailing commas
+  const clean = raw.replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
   try { return JSON.parse(clean); } catch(_) {
     const m = clean.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('Nepodařilo se zparsovat odpověď AI.');
-    const cleaned = m[0].replace(/,\s*([\]}])/g, '$1');
-    return JSON.parse(cleaned);
+    if (!m) throw new Error('Nepodařilo se zparsovat odpověď AI. Zkus to znovu.');
+    return JSON.parse(m[0]);
   }
 }
 
