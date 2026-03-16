@@ -147,6 +147,7 @@ header h1 span { color: var(--accent); }
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
   min-height: 200px; display: flex; align-items: center; justify-content: center;
+  position: relative;
 }
 .camera-box video, .camera-box img { width: 100%; display: block; }
 .placeholder { text-align: center; padding: 1.75rem 1.25rem; }
@@ -191,7 +192,9 @@ label.btn { display: block; cursor: pointer; }
 
 /* ── INGREDIENTS ── */
 .ing-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-.ing-pill { background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 10px; font-size: 13px; color: var(--text); }
+.ing-pill { background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 8px 4px 10px; font-size: 13px; color: var(--text); display: inline-flex; align-items: center; gap: 5px; }
+.pill-remove { background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer; padding: 0; line-height: 1; display: flex; align-items: center; transition: color 0.15s; }
+.pill-remove:hover { color: var(--red); }
 
 /* ── TAGS ── */
 .tag-grid { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -287,6 +290,11 @@ ol.slist li::before { content: counter(s); position: absolute; left: 0; top: 7px
 .week-day .day-emo { font-size: 20px; flex-shrink: 0; }
 .week-day .day-arr { color: var(--text3); font-size: 14px; }
 
+.photo-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.photo-thumb { position: relative; width: 72px; height: 72px; border-radius: 8px; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border2); }
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb .del-photo { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 18px; height: 18px; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.add-photo-btn { width: 72px; height: 72px; border-radius: 8px; border: 1px dashed var(--border2); background: var(--bg2); color: var(--text3); font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 canvas { display: none; }
 </style>
 </head>
@@ -338,7 +346,15 @@ canvas { display: none; }
         <div class="pacc">Fridge Chef ti pomůže!</div>
         <div class="phint" id="placeholder-hint">Vyfoť lednici a za chvíli<br>máš 3 recepty přímo na míru</div>
       </div>
+      <!-- overlay tlačítka při živé kameře -->
+      <div id="camera-overlay" style="display:none; position:absolute; bottom:16px; left:0; right:0; display:none; align-items:center; justify-content:center; gap:16px;">
+        <button onclick="retake()" style="background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.3);border-radius:20px;color:#fff;font-size:13px;padding:7px 16px;cursor:pointer;">Zrušit</button>
+        <button onclick="capture()" style="width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,0.5);cursor:pointer;box-shadow:0 0 0 3px rgba(255,255,255,0.3);"></button>
+      </div>
     </div>
+
+    <!-- foto strip -->
+    <div class="photo-strip" id="photo-strip" style="display:none"></div>
 
     <!-- zbytky textarea -->
     <div id="leftovers-input" style="display:none; margin-top:0.75rem">
@@ -347,14 +363,12 @@ canvas { display: none; }
 
     <div id="btns-start" class="btn-row">
       <button class="btn btn-gold" onclick="startCamera()">Spustit kameru</button>
-      <label class="btn">Ze souboru<input type="file" accept="image/*" style="display:none" onchange="loadFile(event)"></label>
+      <label class="btn">Ze souboru<input type="file" accept="image/*" multiple style="display:none" onchange="loadFile(event)"></label>
     </div>
-    <div id="btns-live" class="btn-row" style="display:none">
-      <button class="btn" onclick="retake()">Zrušit</button>
-      <button class="btn btn-gold" onclick="capture()">Vyfotit</button>
-    </div>
+    <div id="btns-live" class="btn-row" style="display:none"></div>
     <div id="btns-taken" class="btn-row" style="display:none">
-      <button class="btn" onclick="retake()">Znovu</button>
+      <button class="btn" onclick="startCamera()">+ Další foto</button>
+      <button class="btn" onclick="retake()">Smazat vše</button>
       <button class="btn btn-gold" id="analyze-btn" onclick="analyze()">Analyzovat</button>
     </div>
     <div id="btns-leftovers" class="btn-row" style="display:none">
@@ -539,7 +553,7 @@ const $ = id => document.getElementById(id);
 
 /* ══ STATE ══ */
 let stream = null;
-let imageB64 = null;
+let imagesB64 = [];
 let currentMode = 'fridge';
 let allRecipes = [];
 let recipePageIndex = 0;
@@ -594,6 +608,10 @@ function showCameraScreen() {
   $('screen-camera').style.display = 'block';
   $('back-btn').style.display = 'none';
   $('header-sub').textContent = '';
+  imagesB64 = [];
+  renderPhotoStrip();
+  $('placeholder').style.display = 'block';
+  setBtns('start');
   clearMsg();
 }
 function showPrefsScreen() {
@@ -672,51 +690,86 @@ function startCamera() {
       $('video').style.display = 'block';
       $('placeholder').style.display = 'none';
       $('preview').style.display = 'none';
+      $('camera-overlay').style.display = 'flex';
       setBtns('live');
       setStatus('Namiř na lednici...');
     })
     .catch(e => setErr('Kamera není dostupná (' + (e.name||e) + '). Použij "Ze souboru".'));
 }
 function stopCamera() { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } }
+
 function capture() {
   const v = $('video'), c = $('canvas');
   c.width = v.videoWidth||640; c.height = v.videoHeight||480;
   c.getContext('2d').drawImage(v,0,0);
-  imageB64 = compressImage(c);
-  $('preview').src = 'data:image/jpeg;base64,' + imageB64;
-  $('preview').style.display = 'block';
+  const b64 = compressImage(c);
+  imagesB64.push(b64);
+  stopCamera();
   $('video').style.display = 'none';
-  stopCamera(); setBtns('taken');
-  setStatus('Foto pořízeno — klikni na Analyzovat');
+  $('camera-overlay').style.display = 'none';
+  $('placeholder').style.display = 'none';
+  renderPhotoStrip();
+  setBtns('taken');
+  setStatus(imagesB64.length === 1 ? 'Foto přidáno — můžeš přidat další nebo analyzovat' : `${imagesB64.length} fotky — analyzuj nebo přidej další`);
 }
+
 function loadFile(e) {
-  const file = e.target.files[0]; if (!file) return;
+  const files = Array.from(e.target.files); if (!files.length) return;
   clearMsg();
-  const r = new FileReader();
-  r.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      const c = $('canvas');
-      const maxW = 1024, maxH = 1024;
-      let w = img.width, h = img.height;
-      if (w > maxW || h > maxH) {
-        const ratio = Math.min(maxW/w, maxH/h);
-        w = Math.round(w*ratio); h = Math.round(h*ratio);
-      }
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      imageB64 = compressImage(c);
-      $('preview').src = 'data:image/jpeg;base64,' + imageB64;
-      $('preview').style.display = 'block';
-      $('placeholder').style.display = 'none';
-      $('video').style.display = 'none';
-      stopCamera(); setBtns('taken');
-      setStatus('Foto nahráno — klikni na Analyzovat');
+  let loaded = 0;
+  files.forEach(file => {
+    const r = new FileReader();
+    r.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const c = $('canvas');
+        const maxW = 1024, maxH = 1024;
+        let w = img.width, h = img.height;
+        if (w > maxW || h > maxH) {
+          const ratio = Math.min(maxW/w, maxH/h);
+          w = Math.round(w*ratio); h = Math.round(h*ratio);
+        }
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        imagesB64.push(compressImage(c));
+        loaded++;
+        if (loaded === files.length) {
+          $('placeholder').style.display = 'none';
+          $('video').style.display = 'none';
+          stopCamera();
+          renderPhotoStrip();
+          setBtns('taken');
+          setStatus(`${imagesB64.length} ${imagesB64.length===1?'fotka':'fotky'} — analyzuj nebo přidej další`);
+        }
+      };
+      img.src = ev.target.result;
     };
-    img.src = ev.target.result;
-  };
-  r.readAsDataURL(file);
+    r.readAsDataURL(file);
+  });
   e.target.value = '';
+}
+
+function renderPhotoStrip() {
+  const strip = $('photo-strip');
+  if (!imagesB64.length) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  strip.innerHTML = imagesB64.map((b64, i) => `
+    <div class="photo-thumb">
+      <img src="data:image/jpeg;base64,${b64}" />
+      <button class="del-photo" onclick="removePhoto(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removePhoto(idx) {
+  imagesB64.splice(idx, 1);
+  renderPhotoStrip();
+  if (!imagesB64.length) {
+    $('placeholder').style.display = 'block';
+    setBtns('start');
+    clearMsg();
+  } else {
+    setStatus(`${imagesB64.length} ${imagesB64.length===1?'fotka':'fotky'}`);
+  }
 }
 
 function compressImage(canvas) {
@@ -731,16 +784,20 @@ function compressImage(canvas) {
   }
   return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 }
+
 function retake() {
-  stopCamera(); imageB64 = null;
-  $('preview').style.display = 'none';
+  stopCamera(); imagesB64 = [];
   $('video').style.display = 'none';
   $('placeholder').style.display = 'block';
+  $('camera-overlay').style.display = 'none';
+  renderPhotoStrip();
   setBtns('start'); clearMsg();
 }
+
 function setBtns(mode) {
   $('btns-start').style.display = mode==='start'&&currentMode==='fridge' ? 'flex' : 'none';
-  $('btns-live').style.display = mode==='live' ? 'flex' : 'none';
+  $('btns-live').style.display = 'none';
+  $('camera-overlay').style.display = mode==='live' ? 'flex' : 'none';
   $('btns-taken').style.display = mode==='taken' ? 'flex' : 'none';
   $('btns-leftovers').style.display = mode==='start'&&currentMode==='leftovers' ? 'flex' : 'none';
 }
@@ -748,14 +805,14 @@ function setBtns(mode) {
 /* ══ ANALYZE ══ */
 async function analyze() {
   const key = getKey(); if (!key) return;
-  if (!imageB64) { setErr('Nejdřív pořiď nebo nahraj fotku.'); return; }
+  if (!imagesB64.length) { setErr('Nejdřív pořiď nebo nahraj fotku.'); return; }
   clearMsg(); $('analyze-btn').disabled = true;
   setStatus('<span class="spinner"></span> Analyzuji obsah lednice...');
   try {
-    const res = await callAPI(key, [
-      { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageB64 } },
-      { type: 'text', text: `Podívej se na tuto fotku lednice a vypiš všechny ingredience které vidíš.\nOdpověz POUZE jako JSON bez markdown:\n{"ingredients":["ingredience1","ingredience2","..."]}` }
-    ]);
+    const content = imagesB64.map(b64 => ({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }));
+    const photoNote = imagesB64.length > 1 ? `Podívej se na těchto ${imagesB64.length} fotek lednice a vypiš všechny ingredience které vidíš na všech fotkách dohromady.` : 'Podívej se na tuto fotku lednice a vypiš všechny ingredience které vidíš.';
+    content.push({ type: 'text', text: `${photoNote}\nOdpověz POUZE jako JSON bez markdown:\n{"ingredients":["ingredience1","ingredience2","..."]}` });
+    const res = await callAPI(key, content);
     const data = parseJSON(res);
     currentIngredients = data.ingredients || [];
     renderIngredients(currentIngredients);
@@ -1151,7 +1208,22 @@ function resetPlan() {
 
 /* ══ RENDER HELPERS ══ */
 function renderIngredients(ings) {
-  $('ing-grid').innerHTML = ings.map(i=>`<span class="ing-pill">${esc(i)}</span>`).join('');
+  $('ing-grid').innerHTML = ings.map((ing, i) =>
+    `<span class="ing-pill" data-idx="${i}">${esc(ing)}<button class="pill-remove" onclick="removeIngredient(${i})" title="Odebrat">✕</button></span>`
+  ).join('');
+  syncPrefsGrid();
+}
+
+function removeIngredient(idx) {
+  currentIngredients.splice(idx, 1);
+  renderIngredients(currentIngredients);
+}
+
+function syncPrefsGrid() {
+  $('ing-grid-prefs').innerHTML = $('ing-grid').innerHTML;
+  $('ing-grid-prefs').querySelectorAll('.pill-remove').forEach((btn, i) => {
+    btn.onclick = () => removeIngredient(i);
+  });
 }
 
 /* ══ STATUS HELPERS ══ */
