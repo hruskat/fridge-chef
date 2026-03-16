@@ -302,8 +302,8 @@
 
 <header>
   <div style="flex:1">
-    <h1>Fridge <span>Chef</span></h1>
-    <p id="header-sub">Vyfoť lednici, dostaneš recept</p>
+    <h1>Fridge <span>Chef</span> 👨‍🍳</h1>
+    <p id="header-sub">Nevíš co dnes ukuchtit?</p>
   </div>
   <button id="back-btn" onclick="goBack()">← Zpět</button>
   <button id="settings-btn" onclick="openSettings()" title="Nastavení">⚙</button>
@@ -335,7 +335,9 @@
     <img id="preview" style="display:none" alt="náhled" />
     <div class="placeholder" id="placeholder">
       <div class="ico">🧊</div>
-      <p>Vyfoť obsah lednice<br>a AI navrhne 3 recepty</p>
+      <p style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Seš zoufalá nebo jen hledáš inspiraci? 🙂</p>
+      <p>Nevíš co dnes ukuchtit?<br><span style="color:var(--accent)">Fridge Chef ti pomůže!</span> 😄</p>
+      <p style="margin-top:10px;font-size:13px;color:var(--text3)">Vyfoť co máš v lednici<br>a dostaneš 3 recepty na míru</p>
     </div>
   </div>
   <div id="btns-start" class="btn-row">
@@ -503,10 +505,10 @@ function showScreen(name) {
   $('screen-' + name).classList.add('active');
   window.scrollTo(0, 0);
   $('back-btn').style.display = name !== 'camera' ? 'block' : 'none';
-  $('header-sub').textContent = name === 'camera' ? 'Vyfoť lednici, dostaneš recept'
-    : name === 'prefs'   ? 'Upřesni své preference'
-    : name === 'recipes' ? 'Vyber recept'
-    : 'Detail receptu';
+  $('header-sub').textContent = name === 'camera' ? 'Nevíš co dnes ukuchtit?'
+    : name === 'prefs'   ? 'Tak co ti dnes chutná? 🤔'
+    : name === 'recipes' ? 'Tady máš, vyber si! 🍽'
+    : 'Jdeme na to! 👨‍🍳';
 }
 
 function setBtns(mode) {
